@@ -1,8 +1,8 @@
-D                       [0-9]
-L                       [a-zA-Z_]
-H                       [a-fA-F0-9]
-E                       [Ee][+-]?{D}+
-FS                      (f|F|l|L)
+D                       [0-9] /* Decimal */ 
+L                       [a-zA-Z_] /* Letter + _ */
+H                       [a-fA-F0-9] /* Hex */
+E                       [Ee][+-]?{D}+ /* Exposant */
+FS                      (f|F|l|L) /*  */
 IS                      (u|U|l|L)*
 
 %{
@@ -10,82 +10,88 @@ IS                      (u|U|l|L)*
 #include "y.tab.h"
 
 
-/* Ne gère pas les commentaires. A rajouter */
+/* Ne gï¿½re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 
 %}
 
 %%
-"auto"                  { /* A completer */ }
-"break"                 { /* A completer */ }
-"case"                  { /* A completer */ }
-"char"                  { /* A completer */ }
-"const"                 { /* A completer */ }
-"continue"              { /* A completer */ }
-"default"               { /* A completer */ }
-"do"                    { /* A completer */ }
-"double"                { /* A completer */ }
-"else"                  { /* A completer */ }
-"enum"                  { /* A completer */ }
-"extern"                { /* A completer */ }
-"float"                 { /* A completer */ }
-"for"                   { /* A completer */ }
-"goto"                  { /* A completer */ }
-"if"                    { /* A completer */ }
-"int"                   { /* A completer */ }
-"long"                  { /* A completer */ }
-"register"              { /* A completer */ }
-"return"                { /* A completer */ }
-"short"                 { /* A completer */ }
-"signed"                { /* A completer */ }
-"sizeof"                { /* A completer */ }
-"static"                { /* A completer */ }
-"struct"                { /* A completer */ }
-"switch"                { /* A completer */ }
-"typedef"               { /* A completer */ }
-"union"                 { /* A completer */ }
-"unsigned"              { /* A completer */ }
-"void"                  { /* A completer */ }
-"volatile"              { /* A completer */ }
-"while"                 { /* A completer */ }
+"auto"                  { return AUTO; }
+"break"                 { return BREAK; }
+"case"                  { return CASE; }
+"char"                  { return CHAR; }
+"const"                 { return CONST; }
+"continue"              { return CONTINUE; }
+"default"               { return DEFAULT; }
+"do"                    { return DO; }
+"double"                { return DOUBLE; }
+"else"                  { return ELSE; }
+"enum"                  { return ENUM; }
+"extern"                { return EXTERN; }
+"float"                 { return FLOAT; }
+"for"                   { return FOR; }
+"goto"                  { return GOTO; }
+"if"                    { return IF; }
+"int"                   { return INT; }
+"long"                  { return LONG; }
+"register"              { return REGISTER; }
+"return"                { return RETURN; }
+"short"                 { return SHORT; }
+"signed"                { return SIGNED; }
+"sizeof"                { return SIZEOF; }
+"static"                { return STATIC; }
+"struct"                { return STRUCT; }
+"switch"                { return SWITCH; }
+"typedef"               { return TYPEDEF; }
+"union"                 { return UNION; }
+"unsigned"              { return UNSIGNED; }
+"void"                  { return VOID; }
+"volatile"              { return VOLATILE; }
+"while"                 { return WHILE; }
 
-{L}({L}|{D})*           { /* A completer */ }
+{L}({L}|{D})*           { return ID ; }
 
-0[xX]{H}+{IS}?          { /* A completer */ }
-0{D}+{IS}?              { /* A completer */ }
-{D}+{IS}?               { /* A completer */ }
-L?'(\\.|[^\\'])+'       { /* A completer */ }
+0[xX]{H}+{IS}?          { return NUM; }
+0{D}+{IS}?              { return NUM; }
+{D}+{IS}?               { return NUM; }
+L?'(\\.|[^\\'])+'       { return ; } /* pas trop compris celle lÃ 
+# any of (letter, uppercase, one of "_"), optional, literally "'",
+capture (any of ((backslash, anything), none of \\'))
+, once or more */
 
-{D}+{E}{FS}?            { /* A completer */ }
-{D}*"."{D}+({E})?{FS}?  { /* A completer */ }
-{D}+"."{D}*({E})?{FS}?  { /* A completer */ }
+/\*(.|\n)*?\*/          { return; } /* exp qui capture les commentaires sur plusieurs lignes */
 
-L?\"(\\.|[^\\"])*\"     { /* A completer */ }
 
-"..."                   { /* A completer */ }
-">>="                   { /* A completer */ }
-"<<="                   { /* A completer */ }
-"+="                    { /* A completer */ }
-"-="                    { /* A completer */ }
-"*="                    { /* A completer */ }
-"/="                    { /* A completer */ }
-"%="                    { /* A completer */ }
-"&="                    { /* A completer */ }
-"^="                    { /* A completer */ }
-"|="                    { /* A completer */ }
-">>"                    { /* A completer */ }
-"<<"                    { /* A completer */ }
-"++"                    { /* A completer */ }
-"--"                    { /* A completer */ }
-"->"                    { /* A completer */ }
-"&&"                    { /* A completer */ }
-"||"                    { /* A completer */ }
-"<="                    { /* A completer */ }
-">="                    { /* A completer */ }
-"=="                    { /* A completer */ }
-"!="                    { /* A completer */ }
+{D}+{E}{FS}?            { return ; }
+{D}*"."{D}+({E})?{FS}?  { return ; }
+{D}+"."{D}*({E})?{FS}?  { return ; }
 
-[ \t\v\n\f]             { /* A completer */ }
+L?\"(\\.|[^\\"])*\"     { return ; }
+
+"..."                   { return ; }
+">>="                   { return ; }
+"<<="                   { return ; }
+"+="                    { return ; }
+"-="                    { return ; }
+"*="                    { return ; }
+"/="                    { return ; }
+"%="                    { return ; }
+"&="                    { return ; }
+"^="                    { return ; }
+"|="                    { return ; }
+">>"                    { return ; }
+"<<"                    { return ; }
+"++"                    { return ; }
+"--"                    { return ; }
+"->"                    { return ; }
+"&&"                    { return ; }
+"||"                    { return ; }
+"<="                    { return ; }
+">="                    { return ; }
+"=="                    { return ; }
+"!="                    { return ; }
+
+[ \t\v\n\f]             { return ; }
 .                       { return yytext[0]; }
 %%
 
