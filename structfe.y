@@ -6,6 +6,10 @@
 %token STRUCT 
 %token IF ELSE WHILE FOR RETURN
 
+int yywrap(){
+	return 1;
+}
+
 %start program
 %%
 

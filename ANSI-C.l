@@ -50,7 +50,6 @@ IS                      (u|U|l|L)*
 "while"                 { return WHILE; }
 
 {L}({L}|{D})*           { return ID ; }
-yylval
 
 0[xX]{H}+{IS}?          { return NUM; }
 0{D}+{IS}?              { return NUM; }
