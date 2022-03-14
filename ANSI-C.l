@@ -59,7 +59,7 @@ L?'(\\.|[^\\'])+'       { return ; } /* pas trop compris celle là
 capture (any of ((backslash, anything), none of \\'))
 , once or more */
 
-/\*(.|\n)*?\*/          { return; } /* exp qui capture les commentaires sur plusieurs lignes */
+/\*(.|\n)*?\*/          {} /* exp qui capture les commentaires sur plusieurs lignes */
 
 
 {D}+{E}{FS}?            { return ; }
