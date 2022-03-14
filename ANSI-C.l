@@ -50,6 +50,7 @@ IS                      (u|U|l|L)*
 "while"                 { return WHILE; }
 
 {L}({L}|{D})*           { return ID ; }
+yylval
 
 0[xX]{H}+{IS}?          { return NUM; }
 0{D}+{IS}?              { return NUM; }
@@ -62,7 +63,7 @@ capture (any of ((backslash, anything), none of \\'))
 /\*(.|\n)*?\*/          {} /* exp qui capture les commentaires sur plusieurs lignes */
 
 
-{D}+{E}{FS}?            { return ; }
+{D}+{E}{FS}?            { return NUM; }
 {D}*"."{D}+({E})?{FS}?  { return ; }
 {D}+"."{D}*({E})?{FS}?  { return ; }
 
@@ -90,6 +91,10 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 ">="                    { return GT; }
 "=="                    { return EQ; }
 "!="                    { return NE; }
+"+"                     { return PLUS; }
+"*"                     { return AST; }
+"/"                     { return DIV; }
+"-"                     { return MINUS; }
 
 [ \t\v\n\f]             { return ; }
 .                       { return yytext[0]; }
