@@ -1,3 +1,13 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%union {
+        int num;
+        char id;
+}
+
 %token IDENTIFIER CONSTANT SIZEOF
 %token PTR_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP
@@ -5,10 +15,8 @@
 %token INT VOID
 %token STRUCT 
 %token IF ELSE WHILE FOR RETURN
+%nonassoc ELSE
 
-int yywrap(){
-	return 1;
-}
 
 %start program
 %%
@@ -166,11 +174,23 @@ expression_statement
         : ';'
         | expression ';'
         ;
+/* selection_statement
+        : IF '(' expression ')' statement 
+        | IF '(' expression ')' statement ELSE statement
+        ; */
+/* selection_statement
+        : IF '(' expression mid_if_expr ')' statement post_if_expr 
+        | IF '(' expression mid_if_expr ')' statement post_if_expr ELSE statement
+        ; */
 
 selection_statement
-        : IF '(' expression ')' statement
-        | IF '(' expression ')' statement ELSE statement
+        : IF '(' mid_if_expr ')' post_if_expr 
+        | IF '(' mid_if_expr ')' post_if_expr ELSE statement
         ;
+
+mid_if_expr:     /* empty */    {printf("nothing");}
+post_if_expr:    /* empty */    {printf("nothing");} 
+
 
 iteration_statement
         : WHILE '(' expression ')' statement
@@ -198,3 +218,6 @@ function_definition
 
 %%
 
+int yywrap(){
+	return 1;
+}

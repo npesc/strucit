@@ -51,15 +51,15 @@ IS                      (u|U|l|L)*
 
 {L}({L}|{D})*           { return ID ; }
 
-0[xX]{H}+{IS}?          { return NUM; }
-0{D}+{IS}?              { return NUM; }
-{D}+{IS}?               { return NUM; }
+0[xX]{H}+{IS}?          { return CONSTANT; }
+0{D}+{IS}?              { return CONSTANT; }
+{D}+{IS}?               { return CONSTANT; }
 L?'(\\.|[^\\'])+'       { return ; } /* pas trop compris celle là
 # any of (letter, uppercase, one of "_"), optional, literally "'",
 capture (any of ((backslash, anything), none of \\'))
 , once or more */
 
-{D}+{E}{FS}?            { return NUM; }
+{D}+{E}{FS}?            { return CONSTANT; }
 {D}*"."{D}+({E})?{FS}?  { return ; }
 {D}+"."{D}*({E})?{FS}?  { return ; }
 
@@ -95,4 +95,4 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 [ \t\v\n\f]             { return ; }
 .                       { return yytext[0]; }
 %%
-
+int yywrap (void) {return 1;}
