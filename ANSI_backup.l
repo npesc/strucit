@@ -59,6 +59,9 @@ L?'(\\.|[^\\'])+'       { return ; } /* pas trop compris celle là
 capture (any of ((backslash, anything), none of \\'))
 , once or more */
 
+/*/\*(.|\n)*?\*/          {}  exp qui capture les commentaires sur plusieurs lignes */
+
+
 {D}+{E}{FS}?            { return NUM; }
 {D}*"."{D}+({E})?{FS}?  { return ; }
 {D}+"."{D}*({E})?{FS}?  { return ; }
