@@ -72,7 +72,8 @@ extern int yydebug;
     ELSE = 273,                    /* ELSE  */
     WHILE = 274,                   /* WHILE  */
     FOR = 275,                     /* FOR  */
-    RETURN = 276                   /* RETURN  */
+    RETURN = 276,                  /* RETURN  */
+    IFX = 277                      /* IFX  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -100,6 +101,7 @@ extern int yydebug;
 #define WHILE 274
 #define FOR 275
 #define RETURN 276
+#define IFX 277
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -110,7 +112,7 @@ union YYSTYPE
         int num;
         char id;
 
-#line 114 "y.tab.h"
+#line 116 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

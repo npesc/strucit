@@ -78,6 +78,8 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 "|="                    { return BIT_OR_ASSIGN; }
 ">>"                    { return RSHIFT; }
 "<<"                    { return LSHIFT; }
+"<"                     { return LT_OP; }
+">"                     { return GT_OP; }
 "++"                    { return INC; }
 "--"                    { return DEC; }
 "->"                    { return POINTER_STRC; }

@@ -9,12 +9,13 @@
 }
 
 %token IDENTIFIER CONSTANT SIZEOF
-%token PTR_OP LE_OP GE_OP EQ_OP NE_OP
+%token PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
 %token AND_OP OR_OP
 %token EXTERN
 %token INT VOID
 %token STRUCT 
 %token IF ELSE WHILE FOR RETURN
+%nonassoc IFX
 %nonassoc ELSE
 
 
@@ -66,8 +67,8 @@ additive_expression
 
 relational_expression
         : additive_expression
-        | relational_expression '<' additive_expression
-        | relational_expression '>' additive_expression
+        | relational_expression LT_OP additive_expression
+        | relational_expression GT_OP additive_expression
         | relational_expression LE_OP additive_expression
         | relational_expression GE_OP additive_expression
         ;
@@ -174,22 +175,10 @@ expression_statement
         : ';'
         | expression ';'
         ;
-/* selection_statement
-        : IF '(' expression ')' statement 
-        | IF '(' expression ')' statement ELSE statement
-        ; */
-/* selection_statement
-        : IF '(' expression mid_if_expr ')' statement post_if_expr 
-        | IF '(' expression mid_if_expr ')' statement post_if_expr ELSE statement
-        ; */
-
 selection_statement
-        : IF '(' mid_if_expr ')' post_if_expr 
-        | IF '(' mid_if_expr ')' post_if_expr ELSE statement
+        : IF '(' expression ')' statement %prec IFX
+        | IF '(' expression ')' statement ELSE statement
         ;
-
-mid_if_expr:     /* empty */    {printf("nothing");}
-post_if_expr:    /* empty */    {printf("nothing");} 
 
 
 iteration_statement
