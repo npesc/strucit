@@ -98,3 +98,11 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 .                       { return yytext[0]; }
 %%
 int yywrap (void) {return 1;}
+int main(){
+        yyparse();
+}
+int yyerror(char *errormsg)
+{
+    fprintf(stderr, "%s\n", errormsg);
+    exit(1);
+}

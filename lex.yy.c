@@ -351,8 +351,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 70
-#define YY_END_OF_BUFFER 71
+#define YY_NUM_RULES 72
+#define YY_END_OF_BUFFER 73
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -362,16 +362,16 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[226] =
     {   0,
-        0,    0,   71,   69,   68,   68,   69,   69,   69,   69,
-       69,   65,   64,   67,   69,   66,   36,   36,   69,   69,
-       69,   33,   33,   69,   33,   33,   33,   33,   33,   33,
-       33,   33,   33,   33,   33,   33,   33,   33,   33,   69,
-       63,    0,   41,    0,   49,   58,   50,    0,    0,   47,
-       55,   45,   56,   46,   57,    0,   39,   48,   40,   35,
-        0,   36,    0,   36,   54,   60,   62,   61,   53,   33,
+        0,    0,   73,   71,   70,   70,   71,   71,   71,   71,
+       71,   67,   66,   69,   71,   68,   36,   36,   55,   71,
+       56,   33,   33,   71,   33,   33,   33,   33,   33,   33,
+       33,   33,   33,   33,   33,   33,   33,   33,   33,   71,
+       65,    0,   41,    0,   49,   60,   50,    0,    0,   47,
+       57,   45,   58,   46,   59,    0,   39,   48,   40,   35,
+        0,   36,    0,   36,   54,   62,   64,   63,   53,   33,
         0,    0,   51,   33,   33,   33,   33,   33,   33,    8,
        33,   33,   33,   33,   33,   33,   16,   33,   33,   33,
-       33,   33,   33,   33,   33,   33,   33,   33,   52,   59,
+       33,   33,   33,   33,   33,   33,   33,   33,   52,   61,
 
        37,   42,    0,   39,   39,    0,   40,   35,    0,   38,
        34,   44,   43,   33,   33,   33,   33,   33,   33,   33,
@@ -1053,17 +1053,17 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 54 "ANSI-C.l"
-{ return NUM; }
+{ return CONSTANT; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 55 "ANSI-C.l"
-{ return NUM; }
+{ return CONSTANT; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 56 "ANSI-C.l"
-{ return NUM; }
+{ return CONSTANT; }
 	YY_BREAK
 case 37:
 /* rule 37 can match eol */
@@ -1077,7 +1077,7 @@ capture (any of ((backslash, anything), none of \\'))
 case 38:
 YY_RULE_SETUP
 #line 62 "ANSI-C.l"
-{ return NUM; }
+{ return CONSTANT; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
@@ -1163,85 +1163,95 @@ YY_RULE_SETUP
 case 55:
 YY_RULE_SETUP
 #line 81 "ANSI-C.l"
-{ return INC; }
+{ return LT_OP; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 82 "ANSI-C.l"
-{ return DEC; }
+{ return GT_OP; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 83 "ANSI-C.l"
-{ return POINTER_STRC; }
+{ return INC; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 84 "ANSI-C.l"
-{ return AND; }
+{ return DEC; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 85 "ANSI-C.l"
-{ return OR; }
+{ return POINTER_STRC; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 86 "ANSI-C.l"
-{ return LT; }
+{ return AND; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 87 "ANSI-C.l"
-{ return GT; }
+{ return OR; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 88 "ANSI-C.l"
-{ return EQ; }
+{ return LT; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 89 "ANSI-C.l"
-{ return NE; }
+{ return GT; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 90 "ANSI-C.l"
-{ return PLUS; }
+{ return EQ; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 91 "ANSI-C.l"
-{ return AST; }
+{ return NE; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 92 "ANSI-C.l"
-{ return DIV; }
+{ return PLUS; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 93 "ANSI-C.l"
-{ return MINUS; }
+{ return AST; }
 	YY_BREAK
 case 68:
-/* rule 68 can match eol */
 YY_RULE_SETUP
-#line 95 "ANSI-C.l"
-{ return ; }
+#line 94 "ANSI-C.l"
+{ return DIV; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 96 "ANSI-C.l"
-{ return yytext[0]; }
+#line 95 "ANSI-C.l"
+{ return MINUS; }
 	YY_BREAK
 case 70:
+/* rule 70 can match eol */
 YY_RULE_SETUP
 #line 97 "ANSI-C.l"
+{ return ; }
+	YY_BREAK
+case 71:
+YY_RULE_SETUP
+#line 98 "ANSI-C.l"
+{ return yytext[0]; }
+	YY_BREAK
+case 72:
+YY_RULE_SETUP
+#line 99 "ANSI-C.l"
 ECHO;
 	YY_BREAK
-#line 1245 "lex.yy.c"
+#line 1255 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2246,7 +2256,14 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 97 "ANSI-C.l"
+#line 99 "ANSI-C.l"
 
-
-
+int yywrap (void) {return 1;}
+int main(){
+        yyparse();
+}
+int yyerror(char *errormsg)
+{
+    fprintf(stderr, "%s\n", errormsg);
+    exit(1);
+}

@@ -8,13 +8,15 @@
         char id;
 }
 
-%token IDENTIFIER CONSTANT SIZEOF
+%token IDENTIFIER CONSTANT SIZEOF 
 %token PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
 %token AND_OP OR_OP
-%token EXTERN
-%token INT VOID
-%token STRUCT 
-%token IF ELSE WHILE FOR RETURN
+%token AUTO SWITCH CASE
+%token UNION 
+%token EXTERN REGISTER STATIC TYPEDEF VOLATILE
+%token INT VOID DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
+%token STRUCT DEFAULT ENUM
+%token IF ELSE WHILE FOR RETURN BREAK CONTINUE DO GOTO 
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -206,7 +208,3 @@ function_definition
         ;
 
 %%
-
-int yywrap(){
-	return 1;
-}

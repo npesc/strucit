@@ -62,18 +62,41 @@ extern int yydebug;
     GE_OP = 263,                   /* GE_OP  */
     EQ_OP = 264,                   /* EQ_OP  */
     NE_OP = 265,                   /* NE_OP  */
-    AND_OP = 266,                  /* AND_OP  */
-    OR_OP = 267,                   /* OR_OP  */
-    EXTERN = 268,                  /* EXTERN  */
-    INT = 269,                     /* INT  */
-    VOID = 270,                    /* VOID  */
-    STRUCT = 271,                  /* STRUCT  */
-    IF = 272,                      /* IF  */
-    ELSE = 273,                    /* ELSE  */
-    WHILE = 274,                   /* WHILE  */
-    FOR = 275,                     /* FOR  */
-    RETURN = 276,                  /* RETURN  */
-    IFX = 277                      /* IFX  */
+    LT_OP = 266,                   /* LT_OP  */
+    GT_OP = 267,                   /* GT_OP  */
+    AND_OP = 268,                  /* AND_OP  */
+    OR_OP = 269,                   /* OR_OP  */
+    AUTO = 270,                    /* AUTO  */
+    SWITCH = 271,                  /* SWITCH  */
+    CASE = 272,                    /* CASE  */
+    UNION = 273,                   /* UNION  */
+    EXTERN = 274,                  /* EXTERN  */
+    REGISTER = 275,                /* REGISTER  */
+    STATIC = 276,                  /* STATIC  */
+    TYPEDEF = 277,                 /* TYPEDEF  */
+    VOLATILE = 278,                /* VOLATILE  */
+    INT = 279,                     /* INT  */
+    VOID = 280,                    /* VOID  */
+    DOUBLE = 281,                  /* DOUBLE  */
+    CHAR = 282,                    /* CHAR  */
+    FLOAT = 283,                   /* FLOAT  */
+    LONG = 284,                    /* LONG  */
+    SHORT = 285,                   /* SHORT  */
+    SIGNED = 286,                  /* SIGNED  */
+    UNSIGNED = 287,                /* UNSIGNED  */
+    STRUCT = 288,                  /* STRUCT  */
+    DEFAULT = 289,                 /* DEFAULT  */
+    ENUM = 290,                    /* ENUM  */
+    IF = 291,                      /* IF  */
+    ELSE = 292,                    /* ELSE  */
+    WHILE = 293,                   /* WHILE  */
+    FOR = 294,                     /* FOR  */
+    RETURN = 295,                  /* RETURN  */
+    BREAK = 296,                   /* BREAK  */
+    CONTINUE = 297,                /* CONTINUE  */
+    DO = 298,                      /* DO  */
+    GOTO = 299,                    /* GOTO  */
+    IFX = 300                      /* IFX  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -90,18 +113,41 @@ extern int yydebug;
 #define GE_OP 263
 #define EQ_OP 264
 #define NE_OP 265
-#define AND_OP 266
-#define OR_OP 267
-#define EXTERN 268
-#define INT 269
-#define VOID 270
-#define STRUCT 271
-#define IF 272
-#define ELSE 273
-#define WHILE 274
-#define FOR 275
-#define RETURN 276
-#define IFX 277
+#define LT_OP 266
+#define GT_OP 267
+#define AND_OP 268
+#define OR_OP 269
+#define AUTO 270
+#define SWITCH 271
+#define CASE 272
+#define UNION 273
+#define EXTERN 274
+#define REGISTER 275
+#define STATIC 276
+#define TYPEDEF 277
+#define VOLATILE 278
+#define INT 279
+#define VOID 280
+#define DOUBLE 281
+#define CHAR 282
+#define FLOAT 283
+#define LONG 284
+#define SHORT 285
+#define SIGNED 286
+#define UNSIGNED 287
+#define STRUCT 288
+#define DEFAULT 289
+#define ENUM 290
+#define IF 291
+#define ELSE 292
+#define WHILE 293
+#define FOR 294
+#define RETURN 295
+#define BREAK 296
+#define CONTINUE 297
+#define DO 298
+#define GOTO 299
+#define IFX 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -112,7 +158,7 @@ union YYSTYPE
         int num;
         char id;
 
-#line 116 "y.tab.h"
+#line 162 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
