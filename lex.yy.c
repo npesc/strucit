@@ -364,14 +364,14 @@ static const flex_int16_t yy_accept[226] =
     {   0,
         0,    0,   73,   71,   70,   70,   71,   71,   71,   71,
        71,   67,   66,   69,   71,   68,   36,   36,   55,   71,
-       56,   33,   33,   71,   33,   33,   33,   33,   33,   33,
+       57,   33,   33,   71,   33,   33,   33,   33,   33,   33,
        33,   33,   33,   33,   33,   33,   33,   33,   33,   71,
-       65,    0,   41,    0,   49,   60,   50,    0,    0,   47,
-       57,   45,   58,   46,   59,    0,   39,   48,   40,   35,
-        0,   36,    0,   36,   54,   62,   64,   63,   53,   33,
+       65,    0,   41,    0,   49,   62,   50,    0,    0,   47,
+       59,   45,   60,   46,   61,    0,   39,   48,   40,   35,
+        0,   36,    0,   36,   54,   56,   64,   58,   53,   33,
         0,    0,   51,   33,   33,   33,   33,   33,   33,    8,
        33,   33,   33,   33,   33,   33,   16,   33,   33,   33,
-       33,   33,   33,   33,   33,   33,   33,   33,   52,   61,
+       33,   33,   33,   33,   33,   33,   33,   33,   52,   63,
 
        37,   42,    0,   39,   39,    0,   40,   35,    0,   38,
        34,   44,   43,   33,   33,   33,   33,   33,   33,   33,
@@ -1048,7 +1048,7 @@ YY_RULE_SETUP
 case 33:
 YY_RULE_SETUP
 #line 52 "ANSI-C.l"
-{ return ID ; }
+{ return IDENTIFIER ; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
@@ -1168,52 +1168,52 @@ YY_RULE_SETUP
 case 56:
 YY_RULE_SETUP
 #line 82 "ANSI-C.l"
-{ return GT_OP; }
+{ return LE_OP; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 83 "ANSI-C.l"
-{ return INC; }
+{ return GT_OP; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 84 "ANSI-C.l"
-{ return DEC; }
+{ return GE_OP; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 85 "ANSI-C.l"
-{ return POINTER_STRC; }
+{ return INC; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 86 "ANSI-C.l"
-{ return AND; }
+{ return DEC; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 87 "ANSI-C.l"
-{ return OR; }
+{ return POINTER_STRC; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 88 "ANSI-C.l"
-{ return LT; }
+{ return AND_OP; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 89 "ANSI-C.l"
-{ return GT; }
+{ return OR_OP; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 90 "ANSI-C.l"
-{ return EQ; }
+{ return EQ_OP; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 91 "ANSI-C.l"
-{ return NE; }
+{ return NE_OP; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
@@ -1223,7 +1223,7 @@ YY_RULE_SETUP
 case 67:
 YY_RULE_SETUP
 #line 93 "ANSI-C.l"
-{ return AST; }
+{ return PTR_OP; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP

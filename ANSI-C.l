@@ -87,8 +87,6 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 "->"                    { return POINTER_STRC; }
 "&&"                    { return AND_OP; }
 "||"                    { return OR_OP; }
-"<="                    { return LT; }
-">="                    { return GT; }
 "=="                    { return EQ_OP; }
 "!="                    { return NE_OP; }
 "+"                     { return PLUS; }
