@@ -54,18 +54,18 @@ IS                      (u|U|l|L)*
 0[xX]{H}+{IS}?          { return CONSTANT; }
 0{D}+{IS}?              { return CONSTANT; }
 {D}+{IS}?               { return CONSTANT; }
-L?'(\\.|[^\\'])+'       { return ; } /* pas trop compris celle là
+L?'(\\.|[^\\'])+'       {} /* pas trop compris celle là
 # any of (letter, uppercase, one of "_"), optional, literally "'",
 capture (any of ((backslash, anything), none of \\'))
 , once or more */
 
 {D}+{E}{FS}?            { return CONSTANT; }
-{D}*"."{D}+({E})?{FS}?  { return ; }
-{D}+"."{D}*({E})?{FS}?  { return ; }
+{D}*"."{D}+({E})?{FS}?  {}
+{D}+"."{D}*({E})?{FS}?  {}
 
-L?\"(\\.|[^\\"])*\"     { return ; }
+L?\"(\\.|[^\\"])*\"     {}
 
-"..."                   { return ; }
+"..."                   {}
 ">>="                   { return RSHIFT_ASSIGN; }
 "<<="                   { return LSHIFT_ASSIGN; }
 "+="                    { return ADD_ASSIGN; }
@@ -94,12 +94,13 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 "/"                     { return DIV; }
 "-"                     { return MINUS; }
 
-[ \t\v\n\f]             { return ; }
+[ \t\v\n\f]             { }
 .                       { return yytext[0]; }
 %%
 int yywrap (void) {return 1;}
 int main(){
-        yyparse();
+    yylex();
+    return 1;
 }
 int yyerror(char *errormsg)
 {

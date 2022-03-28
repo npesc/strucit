@@ -208,3 +208,8 @@ function_definition
         ;
 
 %%
+#include "lex.yy.c"
+int main(){
+        yyparse();
+        return 1;
+}
