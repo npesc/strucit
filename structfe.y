@@ -1,6 +1,8 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+
+extern int yylex(void);
 %}
 
 %union {
@@ -17,6 +19,23 @@
 %token INT VOID DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
 %token STRUCT DEFAULT ENUM
 %token IF ELSE WHILE FOR RETURN BREAK CONTINUE DO GOTO 
+
+/*
+PARTIE TOKENS PAS GROUPER ENCORE
+
+-- BEGIN --
+*/
+
+%token CONST_ASSIGN LSHIFT_ASSIGN ADD_ASSIGN SUB_ASSIGN
+%token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN BIT_AND_ASSIGN
+%token BIT_OR_ASSIGN RSHIFT INC DEC POINTER_STRC 
+%token  PLUS DIV MINUS
+
+/*
+-- END --
+*/
+
+
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -208,3 +227,28 @@ function_definition
         ;
 
 %%
+
+#include "lex.yy.c"
+#include <ctype.h>
+
+int main(int argc, char *argv[])
+{
+	yyin =fopen(argv[1],"r");
+	if(!yyparse()&& errc<=0)
+	{
+		printf("\nParsing Completed\n");
+		display();
+	}
+	else
+	{
+		printf("\nParsing Failed\n");
+                display();
+	}
+	fclose(yyin);
+	return 0;
+}
+
+yyerror(char *s)
+{
+	printf("\nLine %d : %s %s\n",yylineno,s,yytext);
+}

@@ -34,8 +34,8 @@
 /* Undocumented macros, especially those whose name start with YY_,
    are private implementation details.  Do not rely on them.  */
 
-#ifndef YY_YY_Y_TAB_H_INCLUDED
-# define YY_YY_Y_TAB_H_INCLUDED
+#ifndef YY_YY_STRUCTFE_TAB_H_INCLUDED
+# define YY_YY_STRUCTFE_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -94,61 +94,17 @@ extern int yydebug;
     IFX = 300
   };
 #endif
-/* Tokens.  */
-#define IDENTIFIER 258
-#define CONSTANT 259
-#define SIZEOF 260
-#define PTR_OP 261
-#define LE_OP 262
-#define GE_OP 263
-#define EQ_OP 264
-#define NE_OP 265
-#define LT_OP 266
-#define GT_OP 267
-#define AND_OP 268
-#define OR_OP 269
-#define AUTO 270
-#define SWITCH 271
-#define CASE 272
-#define UNION 273
-#define EXTERN 274
-#define REGISTER 275
-#define STATIC 276
-#define TYPEDEF 277
-#define VOLATILE 278
-#define INT 279
-#define VOID 280
-#define DOUBLE 281
-#define CHAR 282
-#define FLOAT 283
-#define LONG 284
-#define SHORT 285
-#define SIGNED 286
-#define UNSIGNED 287
-#define STRUCT 288
-#define DEFAULT 289
-#define ENUM 290
-#define IF 291
-#define ELSE 292
-#define WHILE 293
-#define FOR 294
-#define RETURN 295
-#define BREAK 296
-#define CONTINUE 297
-#define DO 298
-#define GOTO 299
-#define IFX 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 8 "structfe.y"
+#line 6 "structfe.y"
 
         int num;
         char id;
 
-#line 152 "y.tab.h"
+#line 108 "structfe.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -161,4 +117,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
+#endif /* !YY_YY_STRUCTFE_TAB_H_INCLUDED  */

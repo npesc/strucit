@@ -71,9 +71,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int yylex(void);
-
-#line 77 "y.tab.c"
+#line 75 "structfe.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -104,7 +102,10 @@ extern int yylex(void);
 # define YYERROR_VERBOSE 0
 #endif
 
-
+/* Use api.header.include to #include this header
+   instead of duplicating it here.  */
+#ifndef YY_YY_STRUCTFE_TAB_H_INCLUDED
+# define YY_YY_STRUCTFE_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -163,61 +164,17 @@ extern int yydebug;
     IFX = 300
   };
 #endif
-/* Tokens.  */
-#define IDENTIFIER 258
-#define CONSTANT 259
-#define SIZEOF 260
-#define PTR_OP 261
-#define LE_OP 262
-#define GE_OP 263
-#define EQ_OP 264
-#define NE_OP 265
-#define LT_OP 266
-#define GT_OP 267
-#define AND_OP 268
-#define OR_OP 269
-#define AUTO 270
-#define SWITCH 271
-#define CASE 272
-#define UNION 273
-#define EXTERN 274
-#define REGISTER 275
-#define STATIC 276
-#define TYPEDEF 277
-#define VOLATILE 278
-#define INT 279
-#define VOID 280
-#define DOUBLE 281
-#define CHAR 282
-#define FLOAT 283
-#define LONG 284
-#define SHORT 285
-#define SIGNED 286
-#define UNSIGNED 287
-#define STRUCT 288
-#define DEFAULT 289
-#define ENUM 290
-#define IF 291
-#define ELSE 292
-#define WHILE 293
-#define FOR 294
-#define RETURN 295
-#define BREAK 296
-#define CONTINUE 297
-#define DO 298
-#define GOTO 299
-#define IFX 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 8 "structfe.y"
+#line 6 "structfe.y"
 
         int num;
         char id;
 
-#line 221 "y.tab.c"
+#line 178 "structfe.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -230,7 +187,7 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-
+#endif /* !YY_YY_STRUCTFE_TAB_H_INCLUDED  */
 
 
 
@@ -597,15 +554,15 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    30,    30,    31,    32,    36,    37,    38,    39,    40,
-      44,    45,    49,    50,    51,    55,    56,    57,    61,    62,
-      63,    67,    68,    69,    73,    74,    75,    76,    77,    81,
-      82,    83,    87,    88,    92,    93,    97,    98,   102,   103,
-     107,   108,   112,   113,   114,   118,   119,   120,   124,   125,
-     129,   133,   134,   138,   139,   140,   141,   145,   146,   150,
-     154,   155,   156,   157,   158,   162,   163,   164,   165,   169,
-     170,   174,   175,   179,   180,   183,   184,   189,   190,   194,
-     195,   199,   200,   204,   205,   209
+       0,    28,    28,    29,    30,    34,    35,    36,    37,    38,
+      42,    43,    47,    48,    49,    53,    54,    55,    59,    60,
+      61,    65,    66,    67,    71,    72,    73,    74,    75,    79,
+      80,    81,    85,    86,    90,    91,    95,    96,   100,   101,
+     105,   106,   110,   111,   112,   116,   117,   118,   122,   123,
+     127,   131,   132,   136,   137,   138,   139,   143,   144,   148,
+     152,   153,   154,   155,   156,   160,   161,   162,   163,   167,
+     168,   172,   173,   177,   178,   181,   182,   187,   188,   192,
+     193,   197,   198,   202,   203,   207
 };
 #endif
 
@@ -1533,7 +1490,7 @@ yyreduce:
   switch (yyn)
     {
 
-#line 1537 "y.tab.c"
+#line 1494 "structfe.tab.c"
 
       default: break;
     }
@@ -1765,7 +1722,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 212 "structfe.y"
+#line 210 "structfe.y"
 
 
 #include "lex.yy.c"
