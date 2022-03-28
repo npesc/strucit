@@ -1,6 +1,7 @@
 .DS_Store
 *.swp
 y.tab.gch
-y.tab.c
-y.tab.h
 lex.yy.c
+y.tab.h
+y.tab.c
+a.out
