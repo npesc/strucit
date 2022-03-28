@@ -49,7 +49,7 @@ IS                      (u|U|l|L)*
 "volatile"              { return VOLATILE; }
 "while"                 { return WHILE; }
 
-{L}({L}|{D})*           { return ID ; }
+{L}({L}|{D})*           { return IDENTIFIER ; }
 
 0[xX]{H}+{IS}?          { return CONSTANT; }
 0{D}+{IS}?              { return CONSTANT; }
@@ -79,18 +79,20 @@ L?\"(\\.|[^\\"])*\"     { return ; }
 ">>"                    { return RSHIFT; }
 "<<"                    { return LSHIFT; }
 "<"                     { return LT_OP; }
+"<="                    { return LE_OP; }
 ">"                     { return GT_OP; }
+">="                    { return GE_OP; }
 "++"                    { return INC; }
 "--"                    { return DEC; }
 "->"                    { return POINTER_STRC; }
-"&&"                    { return AND; }
-"||"                    { return OR; }
+"&&"                    { return AND_OP; }
+"||"                    { return OR_OP; }
 "<="                    { return LT; }
 ">="                    { return GT; }
-"=="                    { return EQ; }
-"!="                    { return NE; }
+"=="                    { return EQ_OP; }
+"!="                    { return NE_OP; }
 "+"                     { return PLUS; }
-"*"                     { return AST; }
+"*"                     { return PTR_OP; }
 "/"                     { return DIV; }
 "-"                     { return MINUS; }
 
