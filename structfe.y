@@ -15,6 +15,7 @@ int yyerror(char *msg);
 }
 
 %token IDENTIFIER CONSTANT SIZEOF 
+%token ASSIGN
 %token PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
 %token AND_OP OR_OP
 %token AUTO SWITCH CASE
@@ -206,8 +207,13 @@ jump_statement
         ;
 
 program 
-        : external_declaration 
-        | program external_declaration
+        : external_declaration { printf("\npizdet0"); }
+        | program external_declaration { printf("\npizdet1"); }
+        | test { printf("\npizdet2"); }
+        ;
+
+test 
+        : IDENTIFIER ASSIGN IDENTIFIER ';'  { printf("\nhere"); }
         ;
 
 external_declaration
