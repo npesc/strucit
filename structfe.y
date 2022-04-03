@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int yylex(void);
+extern int yylineno;
+extern char* yytext;
+
+int yylex(void);
+int yyerror(char *msg);
 %}
 
 %union {
@@ -45,7 +49,7 @@ PARTIE TOKENS PAS GROUPER ENCORE
 %%
 
 primary_expression
-        : IDENTIFIER
+        : IDENTIFIER {printf("found an id");}
         | CONSTANT
         | '(' expression ')'
         ;
@@ -213,8 +217,8 @@ jump_statement
         | RETURN expression ';'
         ;
 
-program
-        : external_declaration
+program 
+        : external_declaration 
         | program external_declaration
         ;
 
@@ -228,7 +232,14 @@ function_definition
         ;
 
 %%
-#include "lex.yy.c"
+
+int yyerror(char *msg)
+{
+  // Function to display error messages with line no and token
+    printf("Line no: %d Error message: %s Token: %s\n", yylineno, msg, yytext);
+    return 0;
+}
+
 int main(){
         yyparse();
         return 1;

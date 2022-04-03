@@ -11,6 +11,7 @@ IS                      (u|U|l|L)*
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 
+int yylineno = 0;
 %}
 
 %%
@@ -92,16 +93,12 @@ L?\"(\\.|[^\\"])*\"     {}
 "/"                     { return DIV; }
 "-"                     { return MINUS; }
 
+"\n"                    { yylineno++; }
+
 [ \t\v\n\f]             { }
 .                       { return yytext[0]; }
 %%
-int yywrap (void) {return 1;}
-int main(){
-    yylex();
+
+int yywrap (void) {
     return 1;
-}
-int yyerror(char *errormsg)
-{
-    fprintf(stderr, "%s\n", errormsg);
-    exit(1);
-}
+q}
