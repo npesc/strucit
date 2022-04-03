@@ -21,35 +21,23 @@ int yyerror(char *msg);
 %token UNION 
 %token EXTERN REGISTER STATIC TYPEDEF VOLATILE
 %token INT VOID DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
+%token CONST
 %token STRUCT DEFAULT ENUM
 %token IF ELSE WHILE FOR RETURN BREAK CONTINUE DO GOTO 
-
-/*
-PARTIE TOKENS PAS GROUPER ENCORE
-
--- BEGIN --
-*/
-
-%token CONST RSHIFT_ASSIGN LSHIFT_ASSIGN ADD_ASSIGN SUB_ASSIGN
-%token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN BIT_AND_ASSIGN
-%token BIT_OR_ASSIGN RSHIFT INC DEC POINTER_STRC 
-%token PLUS DIV MINUS BIT_XOR_ASSIGN LSHIFT
-
-/*
-
--- END --
-*/
-
+%token INC DEC PLUS DIV MINUS
+%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
+%token RSHIFT_ASSIGN LSHIFT_ASSIGN BIT_AND_ASSIGN BIT_OR_ASSIGN BIT_XOR_ASSIGN
+%token RSHIFT LSHIFT
+%token POINTER_STRC
 
 %nonassoc IFX
 %nonassoc ELSE
-
 
 %start program
 %%
 
 primary_expression
-        : IDENTIFIER {printf("found an id");}
+        : IDENTIFIER
         | CONSTANT
         | '(' expression ')'
         ;
@@ -233,9 +221,9 @@ function_definition
 
 %%
 
+// Function to display error messages with line no and token
 int yyerror(char *msg)
 {
-  // Function to display error messages with line no and token
     printf("Line no: %d Error message: %s Token: %s\n", yylineno, msg, yytext);
     return 0;
 }
