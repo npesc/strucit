@@ -8,8 +8,8 @@ IS                      (u|U|l|L)*
 %{
 #include <stdio.h>
 #include "y.tab.h"
-/* Ne g�re pas les commentaires. A rajouter */
-/* Supprimer les lignes dont vous n'avez pas besoin. */
+/* Ne g�re pas les commentaires. A rajouter.
+Voir dans l'exemple comment il faut gerer */
 
 int yylineno = 0;
 %}
@@ -83,7 +83,7 @@ L?\"(\\.|[^\\"])*\"     {}
 ">="                    { return GE_OP; }
 "++"                    { return INC; }
 "--"                    { return DEC; }
-"->"                    { return POINTER_STRC; }
+"->"                    { return PTR_OP; }
 "&&"                    { return AND_OP; }
 "||"                    { return OR_OP; }
 "=="                    { return EQ_OP; }

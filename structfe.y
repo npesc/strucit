@@ -60,6 +60,7 @@ unary_expression
         : postfix_expression
         | unary_operator unary_expression
         | SIZEOF unary_expression
+        | SIZEOF '(' type_specifier ')'
         ;
 
 unary_operator
@@ -68,10 +69,19 @@ unary_operator
         | '-'
         ;
 
-multiplicative_expression
+binary_expression
         : unary_expression
-        | multiplicative_expression '*' unary_expression
-        | multiplicative_expression '/' unary_expression
+        | binary_expression '&' unary_expression
+        | binary_expression '|' unary_expression
+        | binary_expression '^' unary_expression
+        | binary_expression LSHIFT unary_expression
+        | binary_expression RSHIFT unary_expression
+        ;
+
+multiplicative_expression
+        : binary_expression
+        | multiplicative_expression '*' binary_expression
+        | multiplicative_expression '/' binary_expression
         ;
 
 additive_expression
