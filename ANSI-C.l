@@ -48,7 +48,7 @@ int yylineno = 0;
 "volatile"              { return VOLATILE; }
 "while"                 { return WHILE; }
 
-{L}({L}|{D})*           { printf("\nID: %s", &yytext[0]); return IDENTIFIER ; }
+{L}({L}|{D})*           { return IDENTIFIER; }
 
 0[xX]{H}+{IS}?          { return CONSTANT; }
 0{D}+{IS}?              { return CONSTANT; }
@@ -67,7 +67,6 @@ L?\"(\\.|[^\\"])*\"     {}
 "..."                   {}
 ">>="                   { return RSHIFT_ASSIGN; }
 "<<="                   { return LSHIFT_ASSIGN; }
-"="                     { return ASSIGN; }
 "+="                    { return ADD_ASSIGN; }
 "-="                    { return SUB_ASSIGN; }
 "*="                    { return MUL_ASSIGN; }
@@ -89,10 +88,6 @@ L?\"(\\.|[^\\"])*\"     {}
 "||"                    { return OR_OP; }
 "=="                    { return EQ_OP; }
 "!="                    { return NE_OP; }
-"+"                     { return PLUS; }
-"*"                     { return PTR_OP; }
-"/"                     { return DIV; }
-"-"                     { return MINUS; }
 
 "\n"                    { yylineno++; }
 

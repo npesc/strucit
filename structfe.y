@@ -38,8 +38,8 @@ int yyerror(char *msg);
 %%
 
 primary_expression
-        : IDENTIFIER
-        | CONSTANT
+        : IDENTIFIER 
+        | CONSTANT 
         | '(' expression ')'
         ;
 
@@ -146,7 +146,7 @@ declarator
         ;
 
 direct_declarator
-        : IDENTIFIER
+        : IDENTIFIER 
         | '(' declarator ')'
         | direct_declarator '(' parameter_list ')'
         | direct_declarator '(' ')'
@@ -207,13 +207,8 @@ jump_statement
         ;
 
 program 
-        : external_declaration { printf("\npizdet0"); }
-        | program external_declaration { printf("\npizdet1"); }
-        | test { printf("\npizdet2"); }
-        ;
-
-test 
-        : IDENTIFIER ASSIGN IDENTIFIER ';'  { printf("\nhere"); }
+        : external_declaration 
+        | program external_declaration 
         ;
 
 external_declaration
