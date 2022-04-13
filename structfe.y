@@ -1,12 +1,22 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "symbolTableModule.c"
 
 extern int yylineno;
 extern char* yytext;
 
 int yylex(void);
 int yyerror(char *msg);
+
+int deepthLevel = -1;
+
+char *identifName;
+int identifType = -1;
+int identifVal = -1;
+
+globalEnvironnement glEnv0 = {0, NULL, NULL};
 %}
 
 %union {
@@ -37,7 +47,14 @@ int yyerror(char *msg);
 
 primary_expression
         : IDENTIFIER 
+            {
+                identifName = malloc(sizeof(char) * 255);
+                memcpy(identifName, yytext, sizeof(char) * 255);
+            }
         | CONSTANT 
+            {
+                identifVal = atoi(yytext);
+            }
         | '(' expression ')'
         ;
 
@@ -119,6 +136,23 @@ expression
 
 declaration
         : declaration_specifiers declarator ';'
+            {
+                int t[] = {1, 0};
+
+                infoIdentif *tmp = malloc(sizeof(infoIdentif));
+                tmp->class = 1;
+                tmp->type = identifType;
+                tmp->value = identifVal;
+                tmp->arraySize = 2;
+                tmp->parameterList = t;
+
+                localEnvironnement *tmpLocEnv = malloc(sizeof(localEnvironnement));
+                tmpLocEnv->name = identifName;
+                tmpLocEnv->info = tmp;
+                tmpLocEnv->nextLocEnv = NULL;
+
+                addNewIdentif(&glEnv0, tmpLocEnv, deepthLevel);
+            }
         | struct_specifier ';'
         ;
 
@@ -128,8 +162,8 @@ declaration_specifiers
         ;
 
 type_specifier
-        : VOID
-        | INT
+        : VOID {identifType = 3;}
+        | INT {identifType = 1;}
         | struct_specifier
         ;
 
@@ -145,7 +179,7 @@ struct_declaration_list
         ;
 
 struct_declaration
-        : type_specifier declarator ';'
+        : type_specifier declarator ';' 
         ;
 
 declarator
@@ -155,6 +189,10 @@ declarator
 
 direct_declarator
         : IDENTIFIER 
+            {
+                identifName = malloc(sizeof(char) * 255);
+                memcpy(identifName, yytext, sizeof(char) * 255);
+            }
         | '(' declarator ')'
         | direct_declarator '(' parameter_list ')'
         | direct_declarator '(' ')'
@@ -178,11 +216,20 @@ statement
         ;
 
 compound_statement
-        : '{' '}'
-        | '{' statement_list '}'
-        | '{' declaration_list '}'
-        | '{' declaration_list statement_list '}'
+        : '{' inter_newBlock '}' {deepthLevel--;}
+        | '{' inter_newBlock statement_list '}' {deepthLevel--;}
+        | '{' inter_newBlock declaration_list '}' {deepthLevel--;}
+        | '{' inter_newBlock declaration_list statement_list '}' {deepthLevel--;}
         ;
+
+inter_newBlock
+        : 
+            {
+                deepthLevel++;
+                if (deepthLevel != 0) {
+                    addNewDeepthLevel(&glEnv0, deepthLevel);
+                }
+            }
 
 declaration_list
         : declaration
@@ -239,5 +286,6 @@ int yyerror(char *msg)
 
 int main(){
         yyparse();
+        printSymbolTable(&glEnv0);
         return 1;
 }
