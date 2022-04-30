@@ -1,3 +1,11 @@
+%{
+#include <stdio.h>
+#include "y.tab.h"
+/* Ne g�re pas les commentaires. A rajouter.
+Voir dans l'exemple comment il faut gerer */
+
+%}
+
 D                       [0-9] 
 L                       [a-zA-Z_] 
 H                       [a-fA-F0-9] 
@@ -5,14 +13,6 @@ E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L) 
 IS                      (u|U|l|L)*
 
-%{
-#include <stdio.h>
-#include "y.tab.h"
-/* Ne g�re pas les commentaires. A rajouter.
-Voir dans l'exemple comment il faut gerer */
-
-int yylineno = 0;
-%}
 
 %%
 "auto"                  { return AUTO; }
@@ -50,15 +50,15 @@ int yylineno = 0;
 
 {L}({L}|{D})*           { return IDENTIFIER; }
 
-0[xX]{H}+{IS}?          { return CONSTANT; }
-0{D}+{IS}?              { return CONSTANT; }
-{D}+{IS}?               { return CONSTANT; }
+0[xX]{H}+{IS}?          { return CONST; }
+0{D}+{IS}?              { return CONST; }
+{D}+{IS}?               { return CONST; }
 L?'(\\.|[^\\'])+'       {} /* pas trop compris celle là
 # any of (letter, uppercase, one of "_"), optional, literally "'",
 capture (any of ((backslash, anything), none of \\'))
 , once or more */
 
-{D}+{E}{FS}?            { return CONSTANT; }
+{D}+{E}{FS}?            { return CONST; }
 {D}*"."{D}+({E})?{FS}?  {}
 {D}+"."{D}*({E})?{FS}?  {}
 

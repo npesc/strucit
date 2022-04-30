@@ -1,15 +1,42 @@
-%token IDENTIFIER CONSTANT 
+%{
+#include <stdio.h>
+#include <stdlib.h>
+int yylex(void);
+int yyerror(char* msg);
+extern FILE *fp;
+extern FILE* yyin;
+extern int yylineno;
+extern char yytext[];
+%}
+
+
+%token IDENTIFIER
 %token LE_OP GE_OP EQ_OP NE_OP
 %token EXTERN
 %token INT VOID
 %token IF RETURN GOTO
+
+%token SIZEOF 
+%token PTR_OP  LT_OP GT_OP
+%token AND_OP OR_OP
+%token AUTO SWITCH CASE
+%token UNION 
+%token REGISTER STATIC TYPEDEF VOLATILE
+%token DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
+%token CONST
+%token STRUCT DEFAULT ENUM
+%token ELSE WHILE FOR BREAK CONTINUE DO  
+%token INC DEC
+%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
+%token RSHIFT_ASSIGN LSHIFT_ASSIGN BIT_AND_ASSIGN BIT_OR_ASSIGN BIT_XOR_ASSIGN
+%token RSHIFT LSHIFT
 
 %start program
 %%
 
 primary_expression
         : IDENTIFIER
-        | CONSTANT
+        | CONST
         ;
 
 postfix_expression
@@ -48,8 +75,8 @@ additive_expression
 
 relational_expression
         : additive_expression
-        | primary_expression '<' primary_expression
-        | primary_expression '>' primary_expression
+        | primary_expression LT_OP primary_expression
+        | primary_expression GT_OP primary_expression
         | primary_expression LE_OP primary_expression
         | primary_expression GE_OP primary_expression
         ;
@@ -158,4 +185,20 @@ function_definition
         ;
 
 %%
+int yyerror(char *msg)
+{
+    printf("Line no: %d Error message: %s Token: %s\n", yylineno, msg, yytext);
+    return 0;
+}
 
+int main(int argc, char* argv[]){
+        // "exemples/exemple-strucit-backend.c"
+        yyin = fopen(argv[1],"r");
+        if(!yyparse())
+                printf("Parsing complete\n");
+        else
+                printf("Parsing failed\n");
+
+        fclose(yyin);
+    return 0;
+}
