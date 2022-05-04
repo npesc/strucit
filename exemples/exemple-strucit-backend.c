@@ -1,11 +1,3 @@
-/*****************************
-
- * Petit exemple de STRUCIT-backend  *
-
- * Il n'y a plus de struct.  *
-
- *****************************/
-
 extern void *malloc(int size);
 extern void free(void *ptr);
 
@@ -27,19 +19,16 @@ void *allouer(void *p) {
     return p;
   }
 }
-
 /* Desallocation de l'element courant de la liste */
 
 void *desallouer(void *p) {
   void *q;
   void *_t1;
-
   _t1=p+suivant;
   q=*_t1;
   free(p);
   return q;
-}
-
+  }
 /* Iterateur sur la liste. Applique la fonction f sur chaque element */
 
 void *parcours(void *l, void *f) {

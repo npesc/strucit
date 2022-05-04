@@ -1,67 +1,32 @@
 %{
 #include <stdio.h>
 #include "y.tab.h"
-/* Ne g�re pas les commentaires. A rajouter.
-Voir dans l'exemple comment il faut gerer */
 
 %}
 
 D                       [0-9] 
 L                       [a-zA-Z_] 
-H                       [a-fA-F0-9] 
-E                       [Ee][+-]?{D}+ 
-FS                      (f|F|l|L) 
 IS                      (u|U|l|L)*
 com                     \/\*.*\*\/
 
 
 %%
-"auto"                  { return AUTO; }
-"break"                 { return BREAK; }
-"case"                  { return CASE; }
-"char"                  { return CHAR; }
 "const"                 { return CONST; }
-"continue"              { return CONTINUE; }
-"default"               { return DEFAULT; }
-"do"                    { return DO; }
-"double"                { return DOUBLE; }
-"else"                  { return ELSE; }
-"enum"                  { return ENUM; }
 "extern"                { return EXTERN; }
-"float"                 { return FLOAT; }
-"for"                   { return FOR; }
 "goto"                  { return GOTO; }
 "if"                    { return IF; }
 "int"                   { return INT; }
-"long"                  { return LONG; }
-"register"              { return REGISTER; }
 "return"                { return RETURN; }
-"short"                 { return SHORT; }
-"signed"                { return SIGNED; }
-"sizeof"                { return SIZEOF; }
-"static"                { return STATIC; }
-"struct"                { return STRUCT; }
-"switch"                { return SWITCH; }
-"typedef"               { return TYPEDEF; }
-"union"                 { return UNION; }
-"unsigned"              { return UNSIGNED; }
 "void"                  { return VOID; }
-"volatile"              { return VOLATILE; }
-"while"                 { return WHILE; }
 
 {L}({L}|{D})*           { return IDENTIFIER; }
 
-0[xX]{H}+{IS}?          { return CONST; }
 0{D}+{IS}?              { return CONST; }
 {D}+{IS}?               { return CONST; }
 L?'(\\.|[^\\'])+'       {} /* pas trop compris celle là
 # any of (letter, uppercase, one of "_"), optional, literally "'",
 capture (any of ((backslash, anything), none of \\'))
 , once or more */
-
-{D}+{E}{FS}?            { return CONST; }
-{D}*"."{D}+({E})?{FS}?  {}
-{D}+"."{D}*({E})?{FS}?  {}
 {com}             {}
 
 "..."                   {}

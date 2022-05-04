@@ -17,7 +17,7 @@ extern char yytext[];
 %token IF RETURN GOTO
 
 %token SIZEOF 
-%token PTR_OP  LT_OP GT_OP
+%token PTR_OP  LT_OP GT_OP COM
 %token AND_OP OR_OP
 %token AUTO SWITCH CASE
 %token UNION 
