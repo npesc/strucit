@@ -1,17 +1,19 @@
-# mini-compiler
+# strucit-compiler
 
-### Compiler le tout
+### Usage
 
+```bash
+make # compiler l'ensemble
+# all: ok
 
-~~sh~~
-~~lex ANSI-C.l~~
-~~yacc structfe.y -d~~
-~~gcc y.tab.h lex.yy.c -ll~~
-~~./a.out~~
+make backend # compiler le backend
+# backend: ok
+cd backend_parser
+./backend file2parse.c
 
+make frontend # compiler le frontend
+# frontend: ok
+./frontend file2struc.c
 ```
-yacc -d structfe.y 
-flex ANSI-C.l 
-gcc -o myProgram y.tab.c lex.yy.c
-./myProgram
-```
+
+#### Auteurs: [@valentinbencheci](https://github.com/valentinbencheci) & [@npesc](https://github.com/npesc)
