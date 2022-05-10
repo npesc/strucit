@@ -306,7 +306,7 @@ declaration_specifiers
         : EXTERN type_specifier
 		{
 			struct node *tmp = mkNode(NULL, NULL, "extern");
-			$$.nd = mkNode(tmp, $2.nd, "declaration_specifiers_extern");
+			$$.nd = mkNode(tmp, $2.nd, "declarSpecif");
 		}
         | type_specifier
 		{
@@ -332,15 +332,17 @@ type_specifier
 struct_specifier
         : STRUCT IDENTIFIER '{' struct_declaration_list '}'
 		{
-			$$.nd = mkNode($2.nd, $4.nd, "struct_specifier_ID{}");
+			struct node *tmp = mkNode(NULL, NULL, $2.name);
+			$$.nd = mkNode(tmp, $4.nd, "structSpecID");
 		}
         | STRUCT '{' struct_declaration_list '}'
 		{
-			$$.nd = mkNode($3.nd, NULL, "struct_specifier_{}");
+			$$.nd = mkNode($3.nd, NULL, "structSpec");
 		}
         | STRUCT IDENTIFIER
 		{
-			$$.nd = mkNode($2.nd, NULL, "struct_specifier_ID");
+			struct node *tmp = mkNode(NULL, NULL, $2.name);
+			$$.nd = mkNode(tmp, NULL, "structSpecID");
 		}
         ;
 
@@ -351,21 +353,21 @@ struct_declaration_list
 		}
         | struct_declaration_list struct_declaration
 		{
-			$$.nd = mkNode($1.nd, $2.nd, "struct_declaration_list");
+			$$.nd = mkNode($1.nd, $2.nd, "structDeclarList");
 		}
         ;
 
 struct_declaration
         : type_specifier declarator ';' 
 		{
-			$$.nd = mkNode($1.nd, $2.nd, "struct_declaration");
+			$$.nd = mkNode($1.nd, $2.nd, "structDeclar");
 		}
         ;
 
 declarator
         : '*' direct_declarator 
 		{
-			$$.nd = mkNode($2.nd, NULL, "*declarator");
+			$$.nd = mkNode($2.nd, NULL, "*declar");
 		}
         | direct_declarator
 		{
@@ -376,19 +378,19 @@ declarator
 direct_declarator
         : IDENTIFIER 
 		{
-			$$.nd = mkNode($1.nd, NULL, "direct_declarator_ID");
+			$$.nd = mkNode(NULL, NULL, $1.name);
 		}
         | '(' declarator ')'
 		{
-			$$.nd = mkNode($2.nd, NULL, "direct_declarator_()");
+			$$.nd = mkNode($2.nd, NULL, "(declar)");
 		}
         | direct_declarator '(' parameter_list ')'
 		{
-			$$.nd = mkNode($1.nd, $3.nd, "direct_declarator_(...)");
+			$$.nd = mkNode($1.nd, $3.nd, "directDeclar(...)");
 		}
         | direct_declarator '(' ')'
 		{
-			$$.nd = mkNode($1.nd, NULL, "direct_declarator_()");
+			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
 		}
         ;
 
@@ -399,14 +401,14 @@ parameter_list
 		}
         | parameter_list ',' parameter_declaration
 		{
-			$$.nd = mkNode($1.nd, $3.nd, "parameter_list");
+			$$.nd = mkNode($1.nd, $3.nd, "paramList");
 		}
         ;
 
 parameter_declaration
         : declaration_specifiers declarator
 		{
-			$$.nd = mkNode($1.nd, $2.nd, "parameter_declaration");
+			$$.nd = mkNode($1.nd, $2.nd, "paramDeclar");
 		}
         ;
 
@@ -436,19 +438,19 @@ statement
 compound_statement
         : '{' '}'
 		{
-			$$.nd = mkNode(NULL, NULL, "compound_statement_{}");
+			$$.nd = mkNode(NULL, NULL, "stmts{}");
 		}
         | '{' statement_list '}'
 		{
-			$$.nd = mkNode($2.nd, NULL, "compound_statement_{st_list}");
+			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
 		}
         | '{' declaration_list '}'
 		{
-			$$.nd = mkNode($2.nd, NULL, "compound_statement_{decl_list}");
+			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
 		}
         | '{' declaration_list statement_list '}'
 		{
-			$$.nd = mkNode($2.nd, $3.nd, "compound_statement_{decl st}");
+			$$.nd = mkNode($2.nd, $3.nd, "stmts{...}");
 		}
         ;
 
@@ -459,7 +461,7 @@ declaration_list
 		}
         | declaration_list declaration
 		{
-			$$.nd = mkNode($1.nd, $2.nd, "declaration_list");
+			$$.nd = mkNode($1.nd, $2.nd, "declarList");
 		}
         ;
 
@@ -470,18 +472,18 @@ statement_list
 		}
         | statement_list statement
 		{
-			$$.nd = mkNode($1.nd, $2.nd, "statement_list");
+			$$.nd = mkNode($1.nd, $2.nd, "stmtsList");
 		}
         ;
 
 expression_statement
         : ';'
 		{
-			$$.nd = mkNode(NULL, NULL, "expression_statement_;");
+			$$.nd = mkNode(NULL, NULL, ";");
 		}
         | expression ';'
 		{
-			$$.nd = mkNode($1.nd, NULL, "expression_statement_expr;");
+			$$.nd = mkNode($1.nd, NULL, "expr");
 		}
         ;
 
@@ -493,7 +495,7 @@ selection_statement
         | IF '(' expression ')' statement ELSE statement
 		{
 			struct node *tmp = mkNode($3.nd, $5.nd, "if");
-			$$.nd = mkNode(tmp, $7.nd, "if_else");
+			$$.nd = mkNode(tmp, $7.nd, "ifElse");
 		}
         ;
 
@@ -518,7 +520,7 @@ jump_statement
 		}
         | RETURN expression ';'
 		{
-			$$.nd = mkNode($2.nd, NULL, "return");
+			$$.nd = mkNode($2.nd, NULL, "returnExpr");
 		}
         ;
 
@@ -526,7 +528,9 @@ program
 		: external_declaration 
 		{
 			$$.nd = mkNode($1.nd, NULL, "program");
-			head = $$.nd;
+			if (head == NULL) {
+				head = $$.nd;
+			}
 		}
         | program external_declaration 
 		{
@@ -548,9 +552,9 @@ external_declaration
 function_definition
         : declaration_specifiers declarator compound_statement
 		{
-			struct node *sign = mkNode($1.nd, $2.nd, "func_sign");
+			struct node *sign = mkNode($1.nd, $2.nd, "funcSign");
 			struct node *stmts = mkNode($3.nd, NULL, "stmts");
-			$$.nd = mkNode(sign, stmts, "function_definition");
+			$$.nd = mkNode(sign, stmts, "functionDef");
 		}
         ;
 
