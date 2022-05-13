@@ -24,7 +24,7 @@ void *allouer(void *p) {
 void *desallouer(void *p) {
   void *q;
   void *_t1;
-  _t1=p+suivant;
+  _t1=p+4;
   q=*_t1;
   free(p);
   return q;
@@ -67,3 +67,8 @@ int main() {
 
   return 1;
 }
+
+int main()
+  {
+    i = i + 1 + i;
+  }

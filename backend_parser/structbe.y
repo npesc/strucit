@@ -16,20 +16,10 @@ extern char yytext[];
 %token INT VOID
 %token IF RETURN GOTO
 
-%token SIZEOF 
-%token PTR_OP  LT_OP GT_OP COM
+%token LT_OP GT_OP COM
 %token AND_OP OR_OP
-%token AUTO SWITCH CASE
-%token UNION 
-%token REGISTER STATIC TYPEDEF VOLATILE
-%token DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
 %token CONST
-%token STRUCT DEFAULT ENUM
-%token ELSE WHILE FOR BREAK CONTINUE DO  
-%token INC DEC
-%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
-%token RSHIFT_ASSIGN LSHIFT_ASSIGN BIT_AND_ASSIGN BIT_OR_ASSIGN BIT_XOR_ASSIGN
-%token RSHIFT LSHIFT
+%token STAR 
 
 %start program
 %%
@@ -57,13 +47,13 @@ unary_expression
 
 unary_operator
         : '&'
-        | '*'
+        | STAR
         | '-'
         ;
 
 multiplicative_expression
         : unary_expression
-        | primary_expression '*' primary_expression
+        | primary_expression STAR primary_expression
         | primary_expression '/' primary_expression
         ;
 
@@ -103,8 +93,8 @@ declaration_specifiers
         ;
 
 type_specifier
-        : VOID
-        | INT
+        : VOID {printf("Type void\n");}
+        | INT   {printf("Type int\n");}
         ;
 
 declarator
@@ -188,17 +178,20 @@ function_definition
 int yyerror(char *msg)
 {
     printf("Line no: %d Error message: %s Token: %s\n", yylineno, msg, yytext);
-    return 0;
+    return 1;
 }
 
 int main(int argc, char* argv[]){
-        // "exemples/exemple-strucit-backend.c"
-        yyin = fopen(argv[1],"r");
-        if(!yyparse())
-                printf("Parsing complete\n");
-        else
-                printf("Parsing failed\n");
-
-        fclose(yyin);
-    return 0;
+	// "exemples/exemple-strucit-backend.c"
+	yyin = fopen(argv[1],"r");
+	if (yyin == NULL) {
+		printf("file not found: %s!\n", argv[1]);
+		return 1;
+	}
+	if(!yyparse())
+		printf("Parsing complete\n");
+	else
+		printf("Parsing failed\n");
+	fclose(yyin);
+	return 0;
 }

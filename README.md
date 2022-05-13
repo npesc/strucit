@@ -13,7 +13,10 @@ cd backend_parser
 
 make frontend # compiler le frontend
 # frontend: ok
-./frontend file2struc.c
+./frontend file2struc
+
+make clean # nettoyer le projet
+clean: ok
 ```
 
 #### Auteurs: [@valentinbencheci](https://github.com/valentinbencheci) & [@npesc](https://github.com/npesc)
