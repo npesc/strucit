@@ -19,13 +19,17 @@ extern char yytext[];
 %token LT_OP GT_OP COM
 %token AND_OP OR_OP
 %token CONST
-%token STAR 
+%token STAR PLUS MINUS SLASH
+
+%union {
+        char name[150];
+}
 
 %start program
 %%
 
 primary_expression
-        : IDENTIFIER
+        : IDENTIFIER                    {printf("Identifier %s encountered\n", yylval.name);}
         | CONST
         ;
 
@@ -48,19 +52,19 @@ unary_expression
 unary_operator
         : '&'
         | STAR
-        | '-'
+        | MINUS
         ;
 
 multiplicative_expression
         : unary_expression
         | primary_expression STAR primary_expression
-        | primary_expression '/' primary_expression
+        | primary_expression SLASH primary_expression
         ;
 
 additive_expression
         : multiplicative_expression
-        | primary_expression '+' primary_expression
-        | primary_expression '-' primary_expression
+        | primary_expression PLUS primary_expression
+        | primary_expression MINUS primary_expression
         ;
 
 relational_expression

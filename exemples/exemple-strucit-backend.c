@@ -31,6 +31,14 @@ void *desallouer(void *p) {
   }
 /* Iterateur sur la liste. Applique la fonction f sur chaque element */
 
+/*
+
+
+
+
+zz
+*/
+
 void *parcours(void *l, void *f) {
   int i;
   void *p;
@@ -68,7 +76,11 @@ int main() {
   return 1;
 }
 
+
 int main()
   {
-    i = i + 1 + i;
+    x=y;
+    *x=y;
+    x=y * z;
+    x=- y;
   }
