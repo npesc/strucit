@@ -7,11 +7,11 @@ all: backend frontend
 	@echo ${ok}
 
 backend:
-	cd backend_parser && $(MAKE) 
+	@cd backend_parser && $(MAKE) 
 	@echo ${bok}
 
 frontend: lex.yy.c y.tab.c
-	@gcc -o frontend y.tab.c lex.yy.c
+	@gcc -fstack-protector-all -o frontend y.tab.c lex.yy.c
 	@echo ${fok}
 
 y.tab.c: structfe.y
@@ -24,3 +24,6 @@ clean:
 	@rm -f y.tab.c y.tab.h lex.yy.c
 	@rm -f backend_parser/y.tab.c backend_parser/y.tab.h backend_parser/lex.yy.c
 	@echo ${clok}
+clean-all: clean
+	@rm -f backend
+	@rm -f frontend

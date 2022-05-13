@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include "y.tab.h"
-
+void yyerror(char*);
 %}
 
 D                       [0-9] 
@@ -12,14 +12,14 @@ com                     \/\*.*\*\/
 
 %%
 "const"                 { return CONST; }
-"extern"                { return EXTERN; }
+"extern"                { printf("%s\n",yytext); return EXTERN; }
 "goto"                  { return GOTO; }
 "if"                    { return IF; }
 "int"                   { return INT; }
 "return"                { return RETURN; }
 "void"                  { return VOID; }
 
-{L}({L}|{D})*           { return IDENTIFIER; }
+(\*)*{L}({L}|{D})*           {printf("%s\n",yytext); return IDENTIFIER; }
 
 0{D}+{IS}?              { return CONST; }
 {D}+{IS}?               { return CONST; }
@@ -29,35 +29,19 @@ capture (any of ((backslash, anything), none of \\'))
 , once or more */
 {com}             {}
 
-"..."                   {}
-">>="                   { return RSHIFT_ASSIGN; }
-"<<="                   { return LSHIFT_ASSIGN; }
-"+="                    { return ADD_ASSIGN; }
-"-="                    { return SUB_ASSIGN; }
-"*="                    { return MUL_ASSIGN; }
-"/="                    { return DIV_ASSIGN; }
-"%="                    { return MOD_ASSIGN; }
-"&="                    { return BIT_AND_ASSIGN; }
-"^="                    { return BIT_XOR_ASSIGN; }
-"|="                    { return BIT_OR_ASSIGN; }
-">>"                    { return RSHIFT; }
-"<<"                    { return LSHIFT; }
+
 "<"                     { return LT_OP; }
 "<="                    { return LE_OP; }
 ">"                     { return GT_OP; }
 ">="                    { return GE_OP; }
-"++"                    { return INC; }
-"--"                    { return DEC; }
-"->"                    { return PTR_OP; }
-"&&"                    { return AND_OP; }
-"||"                    { return OR_OP; }
 "=="                    { return EQ_OP; }
 "!="                    { return NE_OP; }
+"*"                     { printf("%s",yytext);return STAR;}
 
 "\n"                    { yylineno++; }
 
 [ \t\v\n\f]             { }
-.                       { return yytext[0]; }
+.                       { return yytext[0];}
 %%
 
 int yywrap (void) {
