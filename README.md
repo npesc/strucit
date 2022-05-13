@@ -17,6 +17,9 @@ make frontend # compiler le frontend
 
 make clean # nettoyer le projet
 clean: ok
+
+make clean-all # nettoyer et supprimer les executables 
+clean: ok
 ```
 
 #### Auteurs: [@valentinbencheci](https://github.com/valentinbencheci) & [@npesc](https://github.com/npesc)
