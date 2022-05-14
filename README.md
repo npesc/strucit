@@ -16,10 +16,10 @@ make frontend # compiler le frontend
 ./frontend file2struc
 
 make clean # nettoyer le projet
-clean: ok
+# clean: ok
 
 make clean-all # nettoyer et supprimer les executables 
-clean: ok
+# clean: ok
 ```
 
 #### Auteurs: [@valentinbencheci](https://github.com/valentinbencheci) & [@npesc](https://github.com/npesc)

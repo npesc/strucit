@@ -6,4 +6,6 @@ Travaille fait par:
     Valentin :
         - L'execution ensemble de structefe et ANSI-C
 
-    Ahmed : 
+    Ahmed :
+        - Makefile
+        - Backend

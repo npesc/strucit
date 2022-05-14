@@ -11,7 +11,7 @@ backend:
 	@echo ${bok}
 
 frontend: lex.yy.c y.tab.c
-	@gcc -fstack-protector-all -ll -o frontend y.tab.c lex.yy.c
+	@gcc -fstack-protector-all -o frontend y.tab.c lex.yy.c
 	@echo ${fok}
 
 y.tab.c: structfe.y

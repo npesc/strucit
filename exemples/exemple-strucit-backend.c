@@ -36,7 +36,7 @@ void *desallouer(void *p) {
 
 
 
-zz
+zzz
 */
 
 void *parcours(void *l, void *f) {
@@ -59,11 +59,9 @@ void *parcours(void *l, void *f) {
   
   return tete;
 }
-
 /* Alloue une liste chainee puis la desalloue */
 
 int main() {
-
   void *tete;
   void *_t1;
   void *_t2;
@@ -79,6 +77,7 @@ int main() {
 
 int main()
   {
+    char *z;
     x=y;
     *x=y;
     x=y * z;
