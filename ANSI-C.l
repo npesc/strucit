@@ -65,6 +65,17 @@ L?\"(\\.|[^\\"])*\"     {}
 "||"                    { strcpy(yylval.ndObj.name, (yytext)); return OR_OP; }
 "=="                    { strcpy(yylval.ndObj.name, (yytext)); return EQ_OP; }
 "!="                    { strcpy(yylval.ndObj.name, (yytext)); return NE_OP; }
+"*"                     { strcpy(yylval.ndObj.name, (yytext)); return STAR;}
+"("                     { strcpy(yylval.ndObj.name, (yytext)); return LPAR; }
+")"                     { strcpy(yylval.ndObj.name, (yytext)); return RPAR; }
+"+"                     { strcpy(yylval.ndObj.name, (yytext)); return PLUS;}
+"-"                     { strcpy(yylval.ndObj.name, (yytext)); return MINUS;}
+";"                     { strcpy(yylval.ndObj.name, (yytext)); return SEMI; }
+"{"                     { strcpy(yylval.ndObj.name, (yytext)); return LBR; }
+"}"                     { strcpy(yylval.ndObj.name, (yytext)); return RBR; }
+"="                     { strcpy(yylval.ndObj.name, (yytext)); return EG; }
+"&"                     { strcpy(yylval.ndObj.name, (yytext)); return COMAND; }
+
 
 "\n"                    { yylineno++; }
 
@@ -76,3 +87,7 @@ L?\"(\\.|[^\\"])*\"     {}
 int yywrap (void) {
     return 1;
 }
+/* 
+"/"                     { strcpy(yylval.ndObj.name, (yytext)); return SLASH;}
+":"                     { strcpy(yylval.ndObj.name, (yytext)); return COL; }
+","                     { strcpy(yylval.ndObj.name, (yytext)); return COMMA; } */

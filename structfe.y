@@ -44,6 +44,10 @@
 %token <ndObj>  IF ELSE WHILE FOR RETURN
 %token <ndObj>  RSHIFT LSHIFT
 
+%token <ndObj> STAR PLUS MINUS SLASH EG
+%token <ndObj> LPAR RPAR RBR LBR
+%token <ndObj> SEMI COL COMMA COMAND
+
 %type <ndObj> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
 %type <ndObj> binary_expression multiplicative_expression additive_expression relational_expression equality_expression
 %type <ndObj> logical_and_expression logical_or_expression expression declaration declaration_specifiers
@@ -52,9 +56,9 @@
 %type <ndObj> declaration_list statement_list expression_statement selection_statement iteration_statement
 %type <ndObj> jump_statement program external_declaration function_definition
 
-%left '&'
-%left '*'
-%left '-'
+%left COMAND
+%left STAR
+%left MINUS
 
 %nonassoc IFX
 %nonassoc ELSE
@@ -73,7 +77,7 @@ primary_expression
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 		} 
-        | '(' expression ')'
+        | LPAR expression RPAR
 		{
 			$$.nd = $2.nd;
 		}
@@ -84,11 +88,11 @@ postfix_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | postfix_expression '(' ')'
+        | postfix_expression LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "func()");
 		}
-        | postfix_expression '(' argument_expression_list ')'
+        | postfix_expression LPAR argument_expression_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "func(...)");
 		}
@@ -127,7 +131,7 @@ unary_expression
 			struct node *tmp = mkNode(NULL, NULL, "sizeof");
 			$$.nd = mkNode(tmp, $2.nd, "unaryExp");
 		}
-        | SIZEOF '(' type_specifier ')'
+        | SIZEOF LPAR type_specifier RPAR
 		{
 			struct node *tmp = mkNode(NULL, NULL, "sizeof");
 			$$.nd = mkNode(tmp, $3.nd, "unaryExp");
@@ -135,15 +139,15 @@ unary_expression
         ;
 
 unary_operator
-        : '&'
+        : COMAND
 		{
 			$$.nd = mkNode(NULL, NULL, "&");
 		}
-        | '*'
+        | STAR
 		{
 			$$.nd = mkNode(NULL, NULL, "*");
 		}
-        | '-'
+        | MINUS
 		{
 			$$.nd = mkNode(NULL, NULL, "-");
 		}
@@ -154,7 +158,7 @@ binary_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | binary_expression '&' unary_expression
+        | binary_expression COMAND unary_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "&");
 		}
@@ -181,7 +185,7 @@ multiplicative_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | multiplicative_expression '*' binary_expression
+        | multiplicative_expression STAR binary_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "*");
 		}
@@ -196,11 +200,11 @@ additive_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | additive_expression '+' multiplicative_expression
+        | additive_expression PLUS multiplicative_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "+");
 		}
-        | additive_expression '-' multiplicative_expression
+        | additive_expression MINUS multiplicative_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "-");
 		}
@@ -271,19 +275,19 @@ expression
 		{
 			$$.nd = $1.nd;
 		}
-        | unary_expression '=' expression
+        | unary_expression EG expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "=");
 		}
         ;
 
 declaration
-        : declaration_specifiers declarator ';'
+        : declaration_specifiers declarator SEMI
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
 			env = addNewVar(env, createVarData(id, type, countn));
 		}
-        | struct_specifier ';'
+        | struct_specifier SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "declarStruct");
 		}
@@ -319,12 +323,12 @@ type_specifier
         ;
 
 struct_specifier
-        : STRUCT IDENTIFIER '{' struct_declaration_list '}'
+        : STRUCT IDENTIFIER LBR struct_declaration_list RBR
 		{
 			struct node *tmp = mkNode(NULL, NULL, $2.name);
 			$$.nd = mkNode(tmp, $4.nd, "structSpecID");
 		}
-        | STRUCT '{' struct_declaration_list '}'
+        | STRUCT LBR struct_declaration_list RBR
 		{
 			$$.nd = mkNode($3.nd, NULL, "structSpec");
 		}
@@ -347,14 +351,14 @@ struct_declaration_list
         ;
 
 struct_declaration
-        : type_specifier declarator ';' 
+        : type_specifier declarator SEMI 
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "structDeclar");
 		}
         ;
 
 declarator
-        : '*' direct_declarator 
+        : STAR direct_declarator 
 		{
 			$$.nd = mkNode($2.nd, NULL, "*declar");
 			convertToPointer();
@@ -371,15 +375,15 @@ direct_declarator
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setID($1.name);
 		}
-        | '(' declarator ')'
+        | LPAR declarator RPAR
 		{
 			$$.nd = mkNode($2.nd, NULL, "(declar)");
 		}
-        | direct_declarator '(' parameter_list ')'
+        | direct_declarator LPAR parameter_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "directDeclar(...)");
 		}
-        | direct_declarator '(' ')'
+        | direct_declarator LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
 		}
@@ -427,19 +431,19 @@ statement
         ;
 
 compound_statement
-        : '{' '}'
+        : LBR RBR
 		{
 			$$.nd = mkNode(NULL, NULL, "stmts{}");
 		}
-        | '{' statement_list '}'
+        | LBR statement_list RBR
 		{
 			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
 		}
-        | '{' declaration_list '}'
+        | LBR declaration_list RBR
 		{
 			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
 		}
-        | '{' declaration_list statement_list '}'
+        | LBR declaration_list statement_list RBR
 		{
 			$$.nd = mkNode($2.nd, $3.nd, "stmts{...}");
 		}
@@ -468,22 +472,22 @@ statement_list
         ;
 
 expression_statement
-        : ';'
+        : SEMI
 		{
 			$$.nd = mkNode(NULL, NULL, ";");
 		}
-        | expression ';'
+        | expression SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "expr");
 		}
         ;
 
 selection_statement
-        : IF '(' expression ')' statement %prec IFX
+        : IF LPAR expression RPAR statement %prec IFX
 		{
 			$$.nd = mkNode($3.nd, $5.nd, "if");
 		}
-        | IF '(' expression ')' statement ELSE statement
+        | IF LPAR expression RPAR statement ELSE statement
 		{
 			struct node *tmp = mkNode($3.nd, $5.nd, "if");
 			$$.nd = mkNode(tmp, $7.nd, "ifElse");
@@ -492,11 +496,11 @@ selection_statement
 
 
 iteration_statement
-        : WHILE '(' expression ')' statement
+        : WHILE LPAR expression RPAR statement
 		{
 			$$.nd = mkNode($3.nd, $5.nd, "while");
 		}
-        | FOR '(' expression_statement expression_statement expression ')' statement
+        | FOR LPAR expression_statement expression_statement expression RPAR statement
 		{
 			struct node *cond = mkNode($4.nd, $5.nd, "subCond");
 			struct node *condMain = mkNode($3.nd, cond, "condFor");
@@ -505,11 +509,11 @@ iteration_statement
         ;
 
 jump_statement
-        : RETURN ';'
+        : RETURN SEMI
 		{
 			$$.nd = mkNode(NULL, NULL, "return");
 		}
-        | RETURN expression ';'
+        | RETURN expression SEMI
 		{
 			$$.nd = mkNode($2.nd, NULL, "returnExpr");
 		}
@@ -583,13 +587,13 @@ int main(int argc, char* argv[]){
 		int *tab = malloc(sizeof(int) * 100);
 		tab = getMaxLvlLen(head, tab,  0);
 		printVarST(env);
-		printf("Parsing complete\n");
+		/* printSyntaxTree_v2(head, tab, -1, 0, 0, 0); 
+		printSyntaxTree_v1(head, 0);  */
+		printf("\nParsing complete\n");
 	}
 	else
 		printf("Parsing failed\n");
 	fclose(yyin);
 	return 0;
 
-	/* printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
-	/* printSyntaxTree_v1(head, 0);  */
 }
