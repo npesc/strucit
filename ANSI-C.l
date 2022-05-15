@@ -11,10 +11,6 @@
 
 D                       [0-9] 
 L                       [a-zA-Z_] 
-H                       [a-fA-F0-9] 
-E                       [Ee][+-]?{D}+ 
-FS                      (f|F|l|L) 
-IS                      (u|U|l|L)*
 
 %x ML_COMMENT
 
@@ -33,17 +29,8 @@ IS                      (u|U|l|L)*
 
 {L}({L}|{D})*           { strcpy(yylval.ndObj.name, (yytext)); return IDENTIFIER; }
 
-0[xX]{H}+{IS}?          { strcpy(yylval.ndObj.name, (yytext)); return CONSTANT; }
-0{D}+{IS}?              { strcpy(yylval.ndObj.name, (yytext)); return CONSTANT; }
-{D}+{IS}?               { strcpy(yylval.ndObj.name, (yytext)); return CONSTANT; }
-L?'(\\.|[^\\'])+'       {} /* pas trop compris celle là
-# any of (letter, uppercase, one of "_"), optional, literally "'",
-capture (any of ((backslash, anything), none of \\'))
-, once or more */
+{D}+                    { strcpy(yylval.ndObj.name, (yytext)); return CONSTANT; }
 
-{D}+{E}{FS}?            { strcpy(yylval.ndObj.name,(yytext)); return CONSTANT; }
-{D}*"."{D}+({E})?{FS}?  {}
-{D}+"."{D}*({E})?{FS}?  {}
 
 "/*"                    { printf("comment from line %d ", yylineno); BEGIN(ML_COMMENT); }
 <ML_COMMENT>"*/"        { printf("to line %d\n", (yylineno+comacc)); BEGIN(INITIAL); }
@@ -51,7 +38,6 @@ capture (any of ((backslash, anything), none of \\'))
 <ML_COMMENT>"*"			
 <ML_COMMENT>"\n"        { comacc+=1;}
 
-L?\"(\\.|[^\\"])*\"     {}
 
 "..."                   {}
 ">>"                    { strcpy(yylval.ndObj.name, (yytext)); return RSHIFT; }
@@ -75,19 +61,17 @@ L?\"(\\.|[^\\"])*\"     {}
 "}"                     { strcpy(yylval.ndObj.name, (yytext)); return RBR; }
 "="                     { strcpy(yylval.ndObj.name, (yytext)); return EG; }
 "&"                     { strcpy(yylval.ndObj.name, (yytext)); return COMAND; }
+"/"                     { strcpy(yylval.ndObj.name, (yytext)); return SLASH;}
+","                     { strcpy(yylval.ndObj.name, (yytext)); return COMMA; }
 
 
 "\n"                    { yylineno++; }
 
 [ \t\v\n\f]             { countn++; }
-.                       { printf("%s", yytext); return yytext[0]; }
+.                       { printf("%s", yytext);}
 
 %%
 
 int yywrap (void) {
     return 1;
 }
-/* 
-"/"                     { strcpy(yylval.ndObj.name, (yytext)); return SLASH;}
-":"                     { strcpy(yylval.ndObj.name, (yytext)); return COL; }
-","                     { strcpy(yylval.ndObj.name, (yytext)); return COMMA; } */

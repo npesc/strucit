@@ -14,7 +14,7 @@ int main() {
    *j=6;
    printd(*j);
 
-   *j=*j+(*i)++;
+   *j=*j+(*i);
    printd(*j);
    return 0;
 }

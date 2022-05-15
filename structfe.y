@@ -46,7 +46,7 @@
 
 %token <ndObj> STAR PLUS MINUS SLASH EG
 %token <ndObj> LPAR RPAR RBR LBR
-%token <ndObj> SEMI COL COMMA COMAND
+%token <ndObj> SEMI COMMA COMAND
 
 %type <ndObj> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
 %type <ndObj> binary_expression multiplicative_expression additive_expression relational_expression equality_expression
@@ -111,7 +111,7 @@ argument_expression_list
 		{
 			$$.nd = $1.nd;
 		}
-        | argument_expression_list ',' expression
+        | argument_expression_list COMMA expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "argExpList");
 		}
@@ -189,7 +189,7 @@ multiplicative_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "*");
 		}
-        | multiplicative_expression '/' binary_expression
+        | multiplicative_expression SLASH binary_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "/");
 		}
@@ -394,7 +394,7 @@ parameter_list
 		{
 			$$.nd = $1.nd;
 		}
-        | parameter_list ',' parameter_declaration
+        | parameter_list COMMA parameter_declaration
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "paramList");
 		}
