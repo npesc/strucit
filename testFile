@@ -1,5 +1,5 @@
 int main(){
     int k;
-    int p:
+    int p;
     int *t;
 }

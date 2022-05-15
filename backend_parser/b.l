@@ -3,6 +3,7 @@
 #include "y.tab.h"
 void yyerror(char*);
 int comacc = 0;
+int yylineno;
 %}
 
 D                       [0-9] 

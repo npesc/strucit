@@ -8,7 +8,6 @@ make # compiler l'ensemble
 
 make backend # compiler le backend
 # backend: ok
-cd backend_parser
 ./backend file2parse.c
 
 make frontend # compiler le frontend

@@ -3,6 +3,8 @@
     #include "y.tab.h"
 
     int countn = 0;
+    int comacc = 0;
+    int yylineno;
 %}
 
 %option yylineno
@@ -13,6 +15,8 @@ H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+ 
 FS                      (f|F|l|L) 
 IS                      (u|U|l|L)*
+
+%x ML_COMMENT
 
 %%
 
@@ -41,6 +45,12 @@ capture (any of ((backslash, anything), none of \\'))
 {D}*"."{D}+({E})?{FS}?  {}
 {D}+"."{D}*({E})?{FS}?  {}
 
+"/*"                    { printf("comment from line %d ", yylineno); BEGIN(ML_COMMENT); }
+<ML_COMMENT>"*/"        { printf("to line %d\n", (yylineno+comacc)); BEGIN(INITIAL); }
+<ML_COMMENT>[^*\n]+		
+<ML_COMMENT>"*"			
+<ML_COMMENT>"\n"        { comacc+=1;}
+
 L?\"(\\.|[^\\"])*\"     {}
 
 "..."                   {}
@@ -59,7 +69,7 @@ L?\"(\\.|[^\\"])*\"     {}
 "\n"                    { yylineno++; }
 
 [ \t\v\n\f]             { countn++; }
-.                       { return yytext[0]; }
+.                       { printf("%s", yytext); return yytext[0]; }
 
 %%
 

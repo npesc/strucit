@@ -12,7 +12,11 @@
 	int yywrap();
 
     extern int countn;
-	extern char *yytext;
+	extern FILE *fp;
+	extern FILE* yyin;
+	extern int yylineno;
+	extern char yytext[];
+	extern int comacc;
 
 	int type;
 	char *id;
@@ -565,22 +569,27 @@ void convertToPointer(){
 
 // Function to display error messages with line no and token
 int yyerror(char *msg)
-{
-    printf("Error message: %s\n", msg);
-    return 0;
+{       
+    printf("Line no: %d Error message: %s Token: %s\n", (yylineno+comacc), msg, yytext);
+    return 1;
 }
+int main(int argc, char* argv[]){
+	yyin = fopen(argv[1],"r");
+	if (yyin == NULL) {
+		printf("file not found: %s!\n", argv[1]);
+		return 1;
+	}
+	if(!yyparse()){
+		int *tab = malloc(sizeof(int) * 100);
+		tab = getMaxLvlLen(head, tab,  0);
+		printVarST(env);
+		printf("Parsing complete\n");
+	}
+	else
+		printf("Parsing failed\n");
+	fclose(yyin);
+	return 0;
 
-int main(){
-	yyparse();
-
-	int *tab = malloc(sizeof(int) * 100);
-	tab = getMaxLvlLen(head, tab,  0);
-	
 	/* printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
 	/* printSyntaxTree_v1(head, 0);  */
-
-	printVarST(env);
-
-	printf("\n");
-	return 1;
 }
