@@ -3,69 +3,50 @@
     #include <string.h>
     #include <stdlib.h>
     #include <ctype.h>
+	#include "modules/utility.h"
+	#include "modules/syntaxTree.h"
+	#include "modules/symbolTable.h"
 
 	int yylex(void);
 	int yyerror(char *msg);
 	int yywrap();
 
-	struct dataType {
-        char * id_name;
-        char * data_type;
-        char * type;
-        int line_no;
-    } symbolTable[150];
-
-	struct node { 
-		char *token; 
-		struct node *childL; 
-		struct node *childR;  
-    };
-
-    int count=0;
-    int q;
-    char type[10];
     extern int countn;
 	extern char *yytext;
-    struct node *head;
 
-	void add(char);
-    void insert_type(void);
-    int search(char *);
-    void printTree(struct node *, int);
-    void printInorder(struct node *);
-    struct node* mkNode(struct node *childL, struct node *childR, char *token);
-	
+	int type;
+	char *id;
+    struct node *head;
+	varEnv *env;
+
+	void setID(char *idVal);
+	void setType(int typeVal);
+	void convertToPointer(void);
 %}
 
 %union { 
 	struct var_name { 
 		char name[100]; 
 		struct node* nd;
-	} nd_obj; 
+	} ndObj; 
 } 
 
-%token <nd_obj>  IDENTIFIER CONSTANT SIZEOF 
-%token <nd_obj>  PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
-%token <nd_obj>  AND_OP OR_OP
-%token <nd_obj>  AUTO SWITCH CASE
-%token <nd_obj>  UNION 
-%token <nd_obj>  EXTERN REGISTER STATIC TYPEDEF VOLATILE
-%token <nd_obj>  INT VOID DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
-%token <nd_obj>  CONST
-%token <nd_obj>  STRUCT DEFAULT ENUM
-%token <nd_obj>  IF ELSE WHILE FOR RETURN BREAK CONTINUE DO GOTO 
-%token <nd_obj>  INC DEC
-%token <nd_obj>  ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
-%token <nd_obj>  RSHIFT_ASSIGN LSHIFT_ASSIGN BIT_AND_ASSIGN BIT_OR_ASSIGN BIT_XOR_ASSIGN
-%token <nd_obj>  RSHIFT LSHIFT
+%token <ndObj>  IDENTIFIER CONSTANT SIZEOF 
+%token <ndObj>  PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
+%token <ndObj>  AND_OP OR_OP
+%token <ndObj>  EXTERN
+%token <ndObj>  INT VOID
+%token <ndObj>  STRUCT
+%token <ndObj>  IF ELSE WHILE FOR RETURN
+%token <ndObj>  RSHIFT LSHIFT
 
-%type <nd_obj> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
-%type <nd_obj> binary_expression multiplicative_expression additive_expression relational_expression equality_expression
-%type <nd_obj> logical_and_expression logical_or_expression expression declaration declaration_specifiers
-%type <nd_obj> type_specifier struct_specifier struct_declaration_list struct_declaration declarator
-%type <nd_obj> direct_declarator parameter_list parameter_declaration statement compound_statement
-%type <nd_obj> declaration_list statement_list expression_statement selection_statement iteration_statement
-%type <nd_obj> jump_statement program external_declaration function_definition
+%type <ndObj> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
+%type <ndObj> binary_expression multiplicative_expression additive_expression relational_expression equality_expression
+%type <ndObj> logical_and_expression logical_or_expression expression declaration declaration_specifiers
+%type <ndObj> type_specifier struct_specifier struct_declaration_list struct_declaration declarator
+%type <ndObj> direct_declarator parameter_list parameter_declaration statement compound_statement
+%type <ndObj> declaration_list statement_list expression_statement selection_statement iteration_statement
+%type <ndObj> jump_statement program external_declaration function_definition
 
 %left '&'
 %left '*'
@@ -82,6 +63,7 @@ primary_expression
         : IDENTIFIER 
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
+			setID($1.name);
 		}
         | CONSTANT
 		{
@@ -295,6 +277,7 @@ declaration
         : declaration_specifiers declarator ';'
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
+			env = addNewVar(env, createVarData(id, type, countn));
 		}
         | struct_specifier ';'
 		{
@@ -318,10 +301,12 @@ type_specifier
         : VOID
 		{
 			$$.nd = mkNode(NULL, NULL, "void");
+			setType(0);
 		}
         | INT
 		{
 			$$.nd = mkNode(NULL, NULL, "int");
+			setType(1);
 		}
         | struct_specifier
 		{
@@ -368,6 +353,7 @@ declarator
         : '*' direct_declarator 
 		{
 			$$.nd = mkNode($2.nd, NULL, "*declar");
+			convertToPointer();
 		}
         | direct_declarator
 		{
@@ -379,6 +365,7 @@ direct_declarator
         : IDENTIFIER 
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
+			setID($1.name);
 		}
         | '(' declarator ')'
 		{
@@ -560,6 +547,22 @@ function_definition
 
 %%
 
+void setID(char *idVal){
+	id = strdup(idVal);
+}
+
+void setType(int typeVal){
+	type = typeVal;
+}
+
+void convertToPointer(){
+	switch (type){
+		case 1:
+			type = 4;
+			break;
+	}
+}
+
 // Function to display error messages with line no and token
 int yyerror(char *msg)
 {
@@ -569,85 +572,15 @@ int yyerror(char *msg)
 
 int main(){
 	yyparse();
-	printf("\t\t\t\t\t\t PHASE 2: SYNTAX ANALYSIS \n\n");
-	printTree(head, 1); 
-	return 1;
-}
 
-int search(char *type) {
-	int i;
-	for(i=count-1; i>=0; i--) {
-		if(strcmp(symbolTable[i].id_name, type)==0) {
-			return -1;
-			break;
-		}
-	}
-	return 0;
-}
+	int *tab = malloc(sizeof(int) * 100);
+	tab = getMaxLvlLen(head, tab,  0);
+	
+	/* printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
+	/* printSyntaxTree_v1(head, 0);  */
 
-void add(char c) {
-    q=search(yytext);
-	if(q==0) {
-		if(c=='H') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup(type);
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Header");
-			count++;
-		}
-		else if(c=='K') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup("N/A");
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Keyword\t");
-			count++;
-		}
-		else if(c=='V') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup(type);
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Variable");
-			count++;
-		}
-		else if(c=='C') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup("CONST");
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Constant");
-			count++;
-		}
-    }
-}
+	printVarST(env);
 
-struct node* mkNode(struct node *childL, struct node *childR, char *token) {	
-	struct node *newNode = (struct node *)malloc(sizeof(struct node));
-	char *newStr = (char *)malloc(strlen(token)+1);
-
-	strcpy(newStr, token);
-	newNode->childL = childL;
-	newNode->childR = childR;
-	newNode->token = newStr;
-	return(newNode);
-}
-
-void printSpace(int c) {
 	printf("\n");
-	for (int i = 0; i < c; i++) {
-		printf(" ");
-	}
-}
-
-void printTree(struct node* tree, int c) {
-	printSpace(c);
-	printf("--> %s", tree->token);
-	if (tree->childL) {
-		printTree(tree->childL, c + 2);
-	}
-	if (tree->childR) {
-		printTree(tree->childR, c + 2);
-	}
-}
-
-void insert_type() {
-	strcpy(type, yytext);
+	return 1;
 }
