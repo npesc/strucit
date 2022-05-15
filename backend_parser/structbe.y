@@ -7,6 +7,7 @@ extern FILE *fp;
 extern FILE* yyin;
 extern int yylineno;
 extern char yytext[];
+extern int comacc;
 %}
 
 
@@ -16,11 +17,11 @@ extern char yytext[];
 %token INT VOID
 %token IF RETURN GOTO
 
-%token LT_OP GT_OP COM
-%token AND_OP OR_OP
+%token LT_OP GT_OP EG
 %token CONST
 %token STAR PLUS MINUS SLASH
-
+%token LPAR RPAR RBR LBR
+%token SEMI COL COMMA COMAND
 %union {
         char name[150];
 }
@@ -35,13 +36,13 @@ primary_expression
 
 postfix_expression
         : primary_expression
-        | postfix_expression '(' ')'
-        | postfix_expression '(' argument_expression_list ')'
+        | postfix_expression LPAR RPAR
+        | postfix_expression LPAR argument_expression_list RPAR
         ;
 
 argument_expression_list
         : primary_expression
-        | argument_expression_list ',' primary_expression
+        | argument_expression_list COMMA primary_expression
         ;
 
 unary_expression
@@ -50,7 +51,7 @@ unary_expression
         ;
 
 unary_operator
-        : '&'
+        : COMAND
         | STAR
         | MINUS
         ;
@@ -83,12 +84,12 @@ equality_expression
 
 expression
         : equality_expression
-        | unary_operator primary_expression '=' primary_expression
-        | primary_expression '=' additive_expression
+        | unary_operator primary_expression EG primary_expression
+        | primary_expression EG additive_expression
         ;
 
 declaration
-        : declaration_specifiers declarator ';'
+        : declaration_specifiers declarator SEMI
         ;
 
 declaration_specifiers
@@ -102,19 +103,19 @@ type_specifier
         ;
 
 declarator
-        : '*' direct_declarator
+        : STAR direct_declarator
         | direct_declarator
         ;
 
 direct_declarator
-        : IDENTIFIER
-        | direct_declarator '(' parameter_list ')'
-        | direct_declarator '(' ')'
+        : IDENTIFIER                    
+        | direct_declarator LPAR parameter_list RPAR
+        | direct_declarator LPAR RPAR
         ;
 
 parameter_list
         : parameter_declaration
-        | parameter_list ',' parameter_declaration
+        | parameter_list COMMA parameter_declaration
         ;
 
 parameter_declaration
@@ -130,10 +131,10 @@ statement
         ;
 
 compound_statement
-        : '{' '}'
-        | '{' statement_list '}'
-        | '{' declaration_list '}'
-        | '{' declaration_list statement_list '}'
+        : LBR RBR
+        | LBR statement_list RBR
+        | LBR declaration_list RBR
+        | LBR declaration_list statement_list RBR
         ;
 
 declaration_list
@@ -147,21 +148,21 @@ statement_list
         ;
 
 labeled_statement
-        : IDENTIFIER ':' statement
+        : IDENTIFIER COL statement
         ;
 
 expression_statement
-        : ';'
-        | expression ';'
+        : SEMI
+        | expression SEMI
         ;
 
 selection_statement
-        : IF '(' equality_expression ')' GOTO IDENTIFIER ';'
+        : IF LPAR equality_expression RPAR GOTO IDENTIFIER SEMI
         ;
 jump_statement
-        : RETURN ';'
-        | RETURN expression ';'
-        | GOTO IDENTIFIER ';'
+        : RETURN SEMI
+        | RETURN expression SEMI
+        | GOTO IDENTIFIER SEMI
         ;
 
 program
@@ -180,8 +181,8 @@ function_definition
 
 %%
 int yyerror(char *msg)
-{
-    printf("Line no: %d Error message: %s Token: %s\n", yylineno, msg, yytext);
+{       
+    printf("Line no: %d Error message: %s Token: %s\n", (yylineno+comacc), msg, yytext);
     return 1;
 }
 

@@ -3,73 +3,62 @@
     #include <string.h>
     #include <stdlib.h>
     #include <ctype.h>
+	#include "modules/utility.h"
+	#include "modules/syntaxTree.h"
+	#include "modules/symbolTable.h"
 
 	int yylex(void);
 	int yyerror(char *msg);
 	int yywrap();
 
-	struct dataType {
-        char * id_name;
-        char * data_type;
-        char * type;
-        int line_no;
-    } symbolTable[150];
-
-	struct node { 
-		char *token; 
-		struct node *childL; 
-		struct node *childR;  
-    };
-
-    int count=0;
-    int q;
-    char type[10];
     extern int countn;
-	extern char *yytext;
-    struct node *head;
+	extern FILE *fp;
+	extern FILE* yyin;
+	extern int yylineno;
+	extern char yytext[];
+	extern int comacc;
 
-	void add(char);
-    void insert_type(void);
-    int search(char *);
-    void printTree(struct node *, int);
-    void printInorder(struct node *);
-    struct node* mkNode(struct node *childL, struct node *childR, char *token);
-	
+	int type;
+	char *id;
+    struct node *head;
+	varEnv *env;
+
+	void setID(char *idVal);
+	void setType(int typeVal);
+	void convertToPointer(void);
 %}
 
 %union { 
 	struct var_name { 
 		char name[100]; 
 		struct node* nd;
-	} nd_obj; 
+	} ndObj; 
 } 
 
-%token <nd_obj>  IDENTIFIER CONSTANT SIZEOF 
-%token <nd_obj>  PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
-%token <nd_obj>  AND_OP OR_OP
-%token <nd_obj>  AUTO SWITCH CASE
-%token <nd_obj>  UNION 
-%token <nd_obj>  EXTERN REGISTER STATIC TYPEDEF VOLATILE
-%token <nd_obj>  INT VOID DOUBLE CHAR FLOAT LONG SHORT SIGNED UNSIGNED
-%token <nd_obj>  CONST
-%token <nd_obj>  STRUCT DEFAULT ENUM
-%token <nd_obj>  IF ELSE WHILE FOR RETURN BREAK CONTINUE DO GOTO 
-%token <nd_obj>  INC DEC
-%token <nd_obj>  ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
-%token <nd_obj>  RSHIFT_ASSIGN LSHIFT_ASSIGN BIT_AND_ASSIGN BIT_OR_ASSIGN BIT_XOR_ASSIGN
-%token <nd_obj>  RSHIFT LSHIFT
+%token <ndObj>  IDENTIFIER CONSTANT SIZEOF 
+%token <ndObj>  PTR_OP LE_OP GE_OP EQ_OP NE_OP LT_OP GT_OP
+%token <ndObj>  AND_OP OR_OP
+%token <ndObj>  EXTERN
+%token <ndObj>  INT VOID
+%token <ndObj>  STRUCT
+%token <ndObj>  IF ELSE WHILE FOR RETURN
+%token <ndObj>  RSHIFT LSHIFT
 
-%type <nd_obj> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
-%type <nd_obj> binary_expression multiplicative_expression additive_expression relational_expression equality_expression
-%type <nd_obj> logical_and_expression logical_or_expression expression declaration declaration_specifiers
-%type <nd_obj> type_specifier struct_specifier struct_declaration_list struct_declaration declarator
-%type <nd_obj> direct_declarator parameter_list parameter_declaration statement compound_statement
-%type <nd_obj> declaration_list statement_list expression_statement selection_statement iteration_statement
-%type <nd_obj> jump_statement program external_declaration function_definition
+%token <ndObj> STAR PLUS MINUS SLASH EG
+%token <ndObj> LPAR RPAR RBR LBR
+%token <ndObj> SEMI COL COMMA COMAND
 
-%left '&'
-%left '*'
-%left '-'
+%type <ndObj> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
+%type <ndObj> binary_expression multiplicative_expression additive_expression relational_expression equality_expression
+%type <ndObj> logical_and_expression logical_or_expression expression declaration declaration_specifiers
+%type <ndObj> type_specifier struct_specifier struct_declaration_list struct_declaration declarator
+%type <ndObj> direct_declarator parameter_list parameter_declaration statement compound_statement
+%type <ndObj> declaration_list statement_list expression_statement selection_statement iteration_statement
+%type <ndObj> jump_statement program external_declaration function_definition
+
+%left COMAND
+%left STAR
+%left MINUS
 
 %nonassoc IFX
 %nonassoc ELSE
@@ -82,12 +71,13 @@ primary_expression
         : IDENTIFIER 
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
+			setID($1.name);
 		}
         | CONSTANT
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 		} 
-        | '(' expression ')'
+        | LPAR expression RPAR
 		{
 			$$.nd = $2.nd;
 		}
@@ -98,11 +88,11 @@ postfix_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | postfix_expression '(' ')'
+        | postfix_expression LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "func()");
 		}
-        | postfix_expression '(' argument_expression_list ')'
+        | postfix_expression LPAR argument_expression_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "func(...)");
 		}
@@ -141,7 +131,7 @@ unary_expression
 			struct node *tmp = mkNode(NULL, NULL, "sizeof");
 			$$.nd = mkNode(tmp, $2.nd, "unaryExp");
 		}
-        | SIZEOF '(' type_specifier ')'
+        | SIZEOF LPAR type_specifier RPAR
 		{
 			struct node *tmp = mkNode(NULL, NULL, "sizeof");
 			$$.nd = mkNode(tmp, $3.nd, "unaryExp");
@@ -149,15 +139,15 @@ unary_expression
         ;
 
 unary_operator
-        : '&'
+        : COMAND
 		{
 			$$.nd = mkNode(NULL, NULL, "&");
 		}
-        | '*'
+        | STAR
 		{
 			$$.nd = mkNode(NULL, NULL, "*");
 		}
-        | '-'
+        | MINUS
 		{
 			$$.nd = mkNode(NULL, NULL, "-");
 		}
@@ -168,7 +158,7 @@ binary_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | binary_expression '&' unary_expression
+        | binary_expression COMAND unary_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "&");
 		}
@@ -195,7 +185,7 @@ multiplicative_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | multiplicative_expression '*' binary_expression
+        | multiplicative_expression STAR binary_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "*");
 		}
@@ -210,11 +200,11 @@ additive_expression
 		{
 			$$.nd = $1.nd;
 		}
-        | additive_expression '+' multiplicative_expression
+        | additive_expression PLUS multiplicative_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "+");
 		}
-        | additive_expression '-' multiplicative_expression
+        | additive_expression MINUS multiplicative_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "-");
 		}
@@ -285,18 +275,19 @@ expression
 		{
 			$$.nd = $1.nd;
 		}
-        | unary_expression '=' expression
+        | unary_expression EG expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "=");
 		}
         ;
 
 declaration
-        : declaration_specifiers declarator ';'
+        : declaration_specifiers declarator SEMI
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
+			env = addNewVar(env, createVarData(id, type, countn));
 		}
-        | struct_specifier ';'
+        | struct_specifier SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "declarStruct");
 		}
@@ -318,10 +309,12 @@ type_specifier
         : VOID
 		{
 			$$.nd = mkNode(NULL, NULL, "void");
+			setType(0);
 		}
         | INT
 		{
 			$$.nd = mkNode(NULL, NULL, "int");
+			setType(1);
 		}
         | struct_specifier
 		{
@@ -330,12 +323,12 @@ type_specifier
         ;
 
 struct_specifier
-        : STRUCT IDENTIFIER '{' struct_declaration_list '}'
+        : STRUCT IDENTIFIER LBR struct_declaration_list RBR
 		{
 			struct node *tmp = mkNode(NULL, NULL, $2.name);
 			$$.nd = mkNode(tmp, $4.nd, "structSpecID");
 		}
-        | STRUCT '{' struct_declaration_list '}'
+        | STRUCT LBR struct_declaration_list RBR
 		{
 			$$.nd = mkNode($3.nd, NULL, "structSpec");
 		}
@@ -358,16 +351,17 @@ struct_declaration_list
         ;
 
 struct_declaration
-        : type_specifier declarator ';' 
+        : type_specifier declarator SEMI 
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "structDeclar");
 		}
         ;
 
 declarator
-        : '*' direct_declarator 
+        : STAR direct_declarator 
 		{
 			$$.nd = mkNode($2.nd, NULL, "*declar");
+			convertToPointer();
 		}
         | direct_declarator
 		{
@@ -379,16 +373,17 @@ direct_declarator
         : IDENTIFIER 
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
+			setID($1.name);
 		}
-        | '(' declarator ')'
+        | LPAR declarator RPAR
 		{
 			$$.nd = mkNode($2.nd, NULL, "(declar)");
 		}
-        | direct_declarator '(' parameter_list ')'
+        | direct_declarator LPAR parameter_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "directDeclar(...)");
 		}
-        | direct_declarator '(' ')'
+        | direct_declarator LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
 		}
@@ -436,19 +431,19 @@ statement
         ;
 
 compound_statement
-        : '{' '}'
+        : LBR RBR
 		{
 			$$.nd = mkNode(NULL, NULL, "stmts{}");
 		}
-        | '{' statement_list '}'
+        | LBR statement_list RBR
 		{
 			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
 		}
-        | '{' declaration_list '}'
+        | LBR declaration_list RBR
 		{
 			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
 		}
-        | '{' declaration_list statement_list '}'
+        | LBR declaration_list statement_list RBR
 		{
 			$$.nd = mkNode($2.nd, $3.nd, "stmts{...}");
 		}
@@ -477,22 +472,22 @@ statement_list
         ;
 
 expression_statement
-        : ';'
+        : SEMI
 		{
 			$$.nd = mkNode(NULL, NULL, ";");
 		}
-        | expression ';'
+        | expression SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "expr");
 		}
         ;
 
 selection_statement
-        : IF '(' expression ')' statement %prec IFX
+        : IF LPAR expression RPAR statement %prec IFX
 		{
 			$$.nd = mkNode($3.nd, $5.nd, "if");
 		}
-        | IF '(' expression ')' statement ELSE statement
+        | IF LPAR expression RPAR statement ELSE statement
 		{
 			struct node *tmp = mkNode($3.nd, $5.nd, "if");
 			$$.nd = mkNode(tmp, $7.nd, "ifElse");
@@ -501,11 +496,11 @@ selection_statement
 
 
 iteration_statement
-        : WHILE '(' expression ')' statement
+        : WHILE LPAR expression RPAR statement
 		{
 			$$.nd = mkNode($3.nd, $5.nd, "while");
 		}
-        | FOR '(' expression_statement expression_statement expression ')' statement
+        | FOR LPAR expression_statement expression_statement expression RPAR statement
 		{
 			struct node *cond = mkNode($4.nd, $5.nd, "subCond");
 			struct node *condMain = mkNode($3.nd, cond, "condFor");
@@ -514,11 +509,11 @@ iteration_statement
         ;
 
 jump_statement
-        : RETURN ';'
+        : RETURN SEMI
 		{
 			$$.nd = mkNode(NULL, NULL, "return");
 		}
-        | RETURN expression ';'
+        | RETURN expression SEMI
 		{
 			$$.nd = mkNode($2.nd, NULL, "returnExpr");
 		}
@@ -560,94 +555,45 @@ function_definition
 
 %%
 
+void setID(char *idVal){
+	id = strdup(idVal);
+}
+
+void setType(int typeVal){
+	type = typeVal;
+}
+
+void convertToPointer(){
+	switch (type){
+		case 1:
+			type = 4;
+			break;
+	}
+}
+
 // Function to display error messages with line no and token
 int yyerror(char *msg)
-{
-    printf("Error message: %s\n", msg);
-    return 0;
+{       
+    printf("Line no: %d Error message: %s Token: %s\n", (yylineno+comacc), msg, yytext);
+    return 1;
 }
-
-int main(){
-	yyparse();
-	printf("\t\t\t\t\t\t PHASE 2: SYNTAX ANALYSIS \n\n");
-	printTree(head, 1); 
-	return 1;
-}
-
-int search(char *type) {
-	int i;
-	for(i=count-1; i>=0; i--) {
-		if(strcmp(symbolTable[i].id_name, type)==0) {
-			return -1;
-			break;
-		}
+int main(int argc, char* argv[]){
+	yyin = fopen(argv[1],"r");
+	if (yyin == NULL) {
+		printf("file not found: %s!\n", argv[1]);
+		return 1;
 	}
+	if(!yyparse()){
+		int *tab = malloc(sizeof(int) * 100);
+		tab = getMaxLvlLen(head, tab,  0);
+		printVarST(env);
+		/* printSyntaxTree_v2(head, tab, -1, 0, 0, 0); 
+		printSyntaxTree_v1(head, 0);  */
+		printf("\nParsing complete\n");
+	}
+	else
+		printf("Parsing failed\n");
+	fclose(yyin);
 	return 0;
-}
 
-void add(char c) {
-    q=search(yytext);
-	if(q==0) {
-		if(c=='H') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup(type);
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Header");
-			count++;
-		}
-		else if(c=='K') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup("N/A");
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Keyword\t");
-			count++;
-		}
-		else if(c=='V') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup(type);
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Variable");
-			count++;
-		}
-		else if(c=='C') {
-			symbolTable[count].id_name=strdup(yytext);
-			symbolTable[count].data_type=strdup("CONST");
-			symbolTable[count].line_no=countn;
-			symbolTable[count].type=strdup("Constant");
-			count++;
-		}
-    }
-}
-
-struct node* mkNode(struct node *childL, struct node *childR, char *token) {	
-	struct node *newNode = (struct node *)malloc(sizeof(struct node));
-	char *newStr = (char *)malloc(strlen(token)+1);
-
-	strcpy(newStr, token);
-	newNode->childL = childL;
-	newNode->childR = childR;
-	newNode->token = newStr;
-	return(newNode);
-}
-
-void printSpace(int c) {
-	printf("\n");
-	for (int i = 0; i < c; i++) {
-		printf(" ");
-	}
-}
-
-void printTree(struct node* tree, int c) {
-	printSpace(c);
-	printf("--> %s", tree->token);
-	if (tree->childL) {
-		printTree(tree->childL, c + 2);
-	}
-	if (tree->childR) {
-		printTree(tree->childR, c + 2);
-	}
-}
-
-void insert_type() {
-	strcpy(type, yytext);
 }
