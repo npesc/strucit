@@ -2,7 +2,6 @@
     #include "string.h"
     #include "y.tab.h"
 
-    int countn = 0;
     int comacc = 0;
     int yylineno;
 %}
@@ -67,7 +66,7 @@ L                       [a-zA-Z_]
 
 "\n"                    { yylineno++; }
 
-[ \t\v\n\f]             { countn++; }
+[ \t\v\n\f]             { }
 .                       { printf("%s", yytext);}
 
 %%

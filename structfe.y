@@ -17,7 +17,9 @@
 	extern int yylineno;
 	extern char yytext[];
 	extern int comacc;
-
+	
+	
+	char msg[200];
 	int type;
 	char *id;
     struct node *head;
@@ -285,7 +287,7 @@ declaration
         : declaration_specifiers declarator SEMI
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
-			env = addNewVar(env, createVarData(id, type, countn));
+			env = addNewVar(env, createVarData(id, type, yylineno));
 		}
         | struct_specifier SEMI
 		{
@@ -414,7 +416,12 @@ statement
 		}
         | expression_statement
 		{
-			$$.nd = $1.nd;
+			if (lookupvar(env, hash($1.name)) != NULL){
+				$$.nd = $1.nd;
+			} else {
+				sprintf(msg, "undeclared variable %s", $1.name);
+				yyerror(msg);
+			}
 		}
         | selection_statement
 		{
@@ -574,7 +581,7 @@ void convertToPointer(){
 // Function to display error messages with line no and token
 int yyerror(char *msg)
 {       
-    printf("Line no: %d Error message: %s Token: %s\n", (yylineno+comacc), msg, yytext);
+    printf("Line no: %d Error message: %s \n", (yylineno+comacc), msg);
     return 1;
 }
 int main(int argc, char* argv[]){

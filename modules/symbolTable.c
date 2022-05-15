@@ -1,4 +1,5 @@
 #include "symbolTable.h"
+#include <stdbool.h>
 
 unsigned long hash(unsigned char *str){
     unsigned int hash = 0;
@@ -8,6 +9,20 @@ unsigned long hash(unsigned char *str){
         hash += c;
 
     return hash;
+}
+
+varEnv* lookupvar(varEnv* env, unsigned int hash){
+
+    while (env != NULL){
+        if (env->hash == hash) {
+            printf("%d found\n", hash);
+            return env;
+        } else {
+            env = env->nextEnv;
+        }
+    }
+    printf("%d not found\n", hash);
+    return NULL; 
 }
 
 varEnv *addNewVar(varEnv *env, varData *data){  

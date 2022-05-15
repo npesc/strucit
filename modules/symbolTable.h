@@ -37,6 +37,7 @@ typedef struct funcEnv{
 unsigned long hash(unsigned char *str);
 varEnv *addNewVar(varEnv *env, varData *data);
 funcEnv *addNewFunc(funcEnv *env, funcData *data);
+varEnv* lookupvar(varEnv* env, unsigned int hash);
 char *getDataType(int i);
 char *getArgsType(int *argsType);
 varData *createVarData(char *id, int type, int line);

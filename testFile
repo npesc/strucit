@@ -5,6 +5,9 @@ int main() {
   int j;
   i = 45000;
   j = -123;
+
+  z = 1;
+  
   printd(i+j);
   printd(45000+j);
   printd(i+123);
