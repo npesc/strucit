@@ -67,6 +67,27 @@ funcEnv *addNewFunc(funcEnv *env, funcData *data){
     return env;
 }
 
+structEnv *addNewStruct(structEnv *env, structData *data){  
+    structEnv *tmpEnv = env;
+    structEnv *newVar = malloc(sizeof(structEnv));
+
+    newVar->hash = hash(data->id);
+    newVar->data = data;
+    newVar->nextEnv = NULL;
+
+    while (tmpEnv != NULL && tmpEnv->nextEnv != NULL){
+        tmpEnv = tmpEnv->nextEnv;
+    }
+    
+    if (env == NULL){
+        env = newVar;
+    } else {
+        tmpEnv->nextEnv = newVar; 
+    }
+    
+    return env;
+}
+
 char *getDataType(int i){
     switch (i)
     {
@@ -83,20 +104,21 @@ char *getDataType(int i){
     }
 }
 
-char *getArgsType(int *argsType){
+char *getArgsType(int *argsType, int argsLen){
     char *res = NULL;
     char tmpDest[255] = "";
-    int len = sizeof(argsType) / sizeof(int);
 
-    for(int i = 0; i <= len; i++){
-        char *tmpChar = strdup(getDataType(*(argsType + i))); 
-        strcat(tmpDest, tmpChar);
+    for(int i = 0; i < argsLen; i++){
+        if ((argsType + i) != NULL){
+            char *tmpChar = strdup(getDataType(*(argsType + i))); 
+            strcat(tmpDest, tmpChar);
 
-        if (i != len){
-            strcat(tmpDest, " ");
+            if (i != argsLen){
+                strcat(tmpDest, " ");
+            }
+
+            res = strdup(tmpDest);
         }
-
-        res = strdup(tmpDest);
     }
 
     return res;
@@ -109,6 +131,24 @@ varData *createVarData(char *id, int type, int line){
     tmpVarData->line = line;
 
     return tmpVarData;
+}
+
+structData *createStructData(char *id, int *argsType, int line){
+    structData *tmpStructData = malloc(sizeof(structData));
+    tmpStructData->id = strdup(id);
+    tmpStructData->argsType = argsType;
+    tmpStructData->line = line;
+    return tmpStructData;
+}
+
+funcData *createFuncData(char *id, int returnType, int *argsType, int argsLen, int line){
+    funcData *tmpFuncData = malloc(sizeof(funcData));
+    tmpFuncData->id = strdup(id);
+    tmpFuncData->returnType = returnType;
+    tmpFuncData->argsType = argsType;
+    tmpFuncData->argsLen = argsLen;
+    tmpFuncData->line = line;
+    return tmpFuncData;
 }
 
 void printDashes(int n){
@@ -152,7 +192,7 @@ void printFuncST(funcEnv *env){
     while(tmpEnv != NULL) {
         funcData *data = tmpEnv->data;
         
-        printf("%-20s %-20d %-20s %-70s %-20d", data->id, tmpEnv->hash, getDataType(data->returnType), getArgsType(data->argsType), data->line);
+        printf("%-20s %-20d %-20s %-70s %-20d", data->id, tmpEnv->hash, getDataType(data->returnType), getArgsType(data->argsType, data->argsLen), data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
@@ -161,6 +201,28 @@ void printFuncST(funcEnv *env){
         tmpEnv = tmpEnv->nextEnv;
     }
     printDashes(150);   
+}
+
+void printStructST(structEnv *env){
+    structEnv *tmpEnv = env;
+
+    printDashes(130);
+    printf("STRUCT SYMBOL TABLE");
+    printDashes(130);
+    printf("%-20s %-20s %-70s %-20s\n", "ID", "HASH", "ARGS_TYPE", "LINE");
+
+    while(tmpEnv != NULL) {
+        structData *data = tmpEnv->data;
+        
+        printf("%-20s %-20d %-70s %-20d", data->id, tmpEnv->hash, getArgsType(data->argsType, data->argsLen), data->line);
+
+        if (tmpEnv->nextEnv != NULL){
+            printf("\n");
+        }
+
+        tmpEnv = tmpEnv->nextEnv;
+    }
+    printDashes(130);   
 }
 
 // int main(int argc, char *argv[]) {
