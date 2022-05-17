@@ -11,7 +11,7 @@ backend:
 	@echo ${bok}
 
 frontend: lex.yy.c y.tab.c
-	@gcc -fstack-protector-all -o frontend y.tab.c lex.yy.c modules/utility.c modules/syntaxTree.c modules/symbolTable.c
+	@gcc -fstack-protector-all -o frontend y.tab.c lex.yy.c modules/utility.c modules/syntaxTree.c modules/symbolTable.c modules/codegen.c
 	@echo ${fok}
 
 y.tab.c: structfe.y

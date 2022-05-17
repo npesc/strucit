@@ -1,0 +1,3 @@
+extern int printd( int z )main()	int i;
+	int j;
+;;;

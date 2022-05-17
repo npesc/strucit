@@ -11,14 +11,14 @@
 	int yyerror(char *msg);
 	int yywrap();
 
-    extern int countn;
 	extern FILE *fp;
 	extern FILE* yyin;
 	extern int yylineno;
 	extern char yytext[];
 	extern int comacc;
+	FILE* out;
 	
-	
+	char temp[200];
 	char msg[200];
 	int type;
 	char *id;
@@ -28,12 +28,15 @@
 	void setID(char *idVal);
 	void setType(int typeVal);
 	void convertToPointer(void);
+	int insert(char* str);
+
 %}
 
 %union { 
 	struct var_name { 
-		char name[100]; 
+		char name[150]; 
 		struct node* nd;
+		char code[6553];
 	} ndObj; 
 } 
 
@@ -74,6 +77,8 @@ primary_expression
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setID($1.name);
+			insert($$.code);
+			
 		}
         | CONSTANT
 		{
@@ -82,6 +87,7 @@ primary_expression
         | LPAR expression RPAR
 		{
 			$$.nd = $2.nd;
+
 		}
         ;
 
@@ -93,6 +99,7 @@ postfix_expression
         | postfix_expression LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "func()");
+			sprintf($$.code, $1.code);
 		}
         | postfix_expression LPAR argument_expression_list RPAR
 		{
@@ -286,9 +293,12 @@ expression
 declaration
         : declaration_specifiers declarator SEMI
 		{
+			
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
 			env = addNewVar(env, createVarData(id, type, yylineno));
-		}
+			sprintf(temp, "%s %s;\n",$1.code, $2.code);
+			strcpy($$.code, temp);
+			}
         | struct_specifier SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "declarStruct");
@@ -300,6 +310,10 @@ declaration_specifiers
 		{
 			struct node *tmp = mkNode(NULL, NULL, "extern");
 			$$.nd = mkNode(tmp, $2.nd, "declarSpecif");
+			char* temp = malloc(sizeof(char) * (strlen($1.name) + strlen($2.code) + 1));
+			sprintf(temp, "extern %s", $2.code);
+			strcpy($$.code, temp);
+			insert($$.code);
 		}
         | type_specifier
 		{
@@ -312,11 +326,13 @@ type_specifier
 		{
 			$$.nd = mkNode(NULL, NULL, "void");
 			setType(0);
+			strcpy($$.code, $1.name);
 		}
         | INT
 		{
 			$$.nd = mkNode(NULL, NULL, "int");
 			setType(1);
+			strcpy($$.code, $1.name);
 		}
         | struct_specifier
 		{
@@ -364,10 +380,12 @@ declarator
 		{
 			$$.nd = mkNode($2.nd, NULL, "*declar");
 			convertToPointer();
+			sprintf($$.code, "%c%s", '*', $2.name);
 		}
         | direct_declarator
 		{
 			$$.nd = $1.nd;
+			strcpy($$.code, $1.name);
 		}
         ;
 
@@ -376,18 +394,29 @@ direct_declarator
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setID($1.name);
+			strcpy($$.code, $1.name);
 		}
         | LPAR declarator RPAR
 		{
 			$$.nd = mkNode($2.nd, NULL, "(declar)");
+			sprintf(temp, "( %s )", $2.name);
+			strcpy($$.code,temp);
 		}
         | direct_declarator LPAR parameter_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "directDeclar(...)");
+			
+			sprintf(temp, " %s( %s )", $1.code, $3.code);
+			strcpy($$.code, temp);
+			insert($$.code);
 		}
         | direct_declarator LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
+			char* temp = malloc(sizeof(char) * 50);
+			sprintf(temp, "%s()", $1.name);
+			strcpy($$.code, temp);
+			insert($$.code);
 		}
         ;
 
@@ -395,6 +424,8 @@ parameter_list
         : parameter_declaration
 		{
 			$$.nd = $1.nd;
+			sprintf($$.code, $1.code);
+			
 		}
         | parameter_list COMMA parameter_declaration
 		{
@@ -406,6 +437,9 @@ parameter_declaration
         : declaration_specifiers declarator
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "paramDeclar");
+			sprintf(temp, "%s %s", $1.code, $2.code);
+
+			strcpy($$.code, temp);
 		}
         ;
 
@@ -420,7 +454,7 @@ statement
 				$$.nd = $1.nd;
 			} else {
 				sprintf(msg, "undeclared variable %s", $1.name);
-				yyerror(msg);
+				return yyerror(msg);
 			}
 		}
         | selection_statement
@@ -441,19 +475,25 @@ compound_statement
         : LBR RBR
 		{
 			$$.nd = mkNode(NULL, NULL, "stmts{}");
+			strcpy($$.code, "{}");
+			
 		}
         | LBR statement_list RBR
 		{
 			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
+
 		}
         | LBR declaration_list RBR
 		{
 			$$.nd = mkNode($2.nd, NULL, "stmts{...}");
+
 		}
         | LBR declaration_list statement_list RBR
 		{
 			$$.nd = mkNode($2.nd, $3.nd, "stmts{...}");
+
 		}
+		
         ;
 
 declaration_list
@@ -464,17 +504,20 @@ declaration_list
         | declaration_list declaration
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "declarList");
+			sprintf(temp, "\t%s\t%s", $1.code, $2.code);
+			strcpy($$.code, temp);
+			insert($$.code);
 		}
         ;
 
 statement_list
-        : statement
-		{
-			$$.nd = $1.nd;
-		}
+        : statement	{		$$.nd = $1.nd;		}
         | statement_list statement
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "stmtsList");
+			char* temp = malloc(sizeof(int) * (strlen($1.code) + strlen($2.code)));
+			sprintf(temp, "%s\n\t%s", $1.code, $2.code);
+			strcpy($$.code, temp);
 		}
         ;
 
@@ -482,11 +525,14 @@ expression_statement
         : SEMI
 		{
 			$$.nd = mkNode(NULL, NULL, ";");
+			
 		}
         | expression SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "expr");
-		}
+			sprintf(temp, "%s;", $1.code);
+			strcpy($$.code,temp);
+			}
         ;
 
 selection_statement
@@ -533,10 +579,14 @@ program
 			if (head == NULL) {
 				head = $$.nd;
 			}
+
+			
 		}
         | program external_declaration 
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "program");
+			char *prog = malloc(sizeof(char) * (strlen($1.code) + strlen($2.code) + 1));
+			sprintf(prog, "%s\n\n%s", $1.code, $2.code);
 		}
 		;
 
@@ -557,6 +607,11 @@ function_definition
 			struct node *sign = mkNode($1.nd, $2.nd, "funcSign");
 			struct node *stmts = mkNode($3.nd, NULL, "stmts");
 			$$.nd = mkNode(sign, stmts, "functionDef");
+
+			char *function = malloc(sizeof(int) * (strlen($1.code) + strlen($2.code) + strlen($3.code) + 1));
+			sprintf(function, "%s %s %s", $1.code, $2.code, $3.code);
+			strcpy($$.code, function);
+			
 		}
         ;
 
@@ -581,10 +636,28 @@ void convertToPointer(){
 // Function to display error messages with line no and token
 int yyerror(char *msg)
 {       
-    printf("Line no: %d Error message: %s \n", (yylineno+comacc), msg);
+    printf("Error at line: %d \nMessage: %s \n", (yylineno+comacc), msg);
     return 1;
 }
+int insert(char* str){
+		FILE* fp = fopen("test.txt", "a+");
+		if(fp == NULL) {
+			printf("insert: file couldn't be opened\n");
+			exit(1);
+		}
+		fprintf(fp, str);
+		fclose(fp);
+		return 0;
+	}
 int main(int argc, char* argv[]){
+
+	FILE* out = fopen("test.txt", "w");
+
+    if(out == NULL) {
+        printf("structfe: file couldn't be opened to write\n");
+        exit(1);
+    }
+
 	yyin = fopen(argv[1],"r");
 	if (yyin == NULL) {
 		printf("file not found: %s!\n", argv[1]);

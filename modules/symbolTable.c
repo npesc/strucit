@@ -12,16 +12,13 @@ unsigned long hash(unsigned char *str){
 }
 
 varEnv* lookupvar(varEnv* env, unsigned int hash){
-
     while (env != NULL){
         if (env->hash == hash) {
-            printf("%d found\n", hash);
             return env;
         } else {
             env = env->nextEnv;
         }
     }
-    printf("%d not found\n", hash);
     return NULL; 
 }
 

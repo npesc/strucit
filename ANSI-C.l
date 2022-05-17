@@ -70,7 +70,7 @@ L                       [a-zA-Z_]
 .                       { printf("%s", yytext);}
 
 %%
-
+FILE* fp1;
 int yywrap (void) {
     return 1;
 }
