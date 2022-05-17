@@ -21,15 +21,32 @@
 	char temp[200];
 	char msg[200];
 	int type;
-	char *id;
-    struct node *head;
-	varEnv *env;
+	int *argsType;
+	int nature = -1; //flag to determine if we declared a variable or a fuction
+	int argsLen = 0; //count number of argument on function definition
 
-	void setID(char *idVal);
+	int programNb = 0; //count program start
+	struct node *headArray[100];
+
+	char *varID; //variable's identifier
+	char *funcID; //function's identifier 
+
+    struct node *head;
+
+	varEnv *envVar;
+	structEnv *envStruct;
+	funcEnv *envFunc;
+
+	void setVarID(char *idVal);
+	void setFuncID(char *idVal);
 	void setType(int typeVal);
 	void convertToPointer(void);
 	int insert(char* str);
 
+
+	// nature :
+	// 	0 -> variable
+	// 	1 -> function
 %}
 
 %union { 
@@ -79,6 +96,7 @@ primary_expression
 			setID($1.name);
 			insert($$.code);
 			
+			setVarID($1.name);
 		}
         | CONSTANT
 		{
@@ -298,7 +316,16 @@ declaration
 			env = addNewVar(env, createVarData(id, type, yylineno));
 			sprintf(temp, "%s %s;\n",$1.code, $2.code);
 			strcpy($$.code, temp);
+			
+
+			if (nature == 0){
+				envVar = addNewVar(envVar, createVarData(varID, type, yylineno));
+			} else {
+				envFunc = addNewFunc(envFunc, createFuncData(funcID, type, argsType, argsLen, yylineno));
+				argsLen = 0;
+				argsType = NULL;
 			}
+		}
         | struct_specifier SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "declarStruct");
@@ -337,6 +364,7 @@ type_specifier
         | struct_specifier
 		{
 			$$.nd = $1.nd;
+			// setType(2);
 		}
         ;
 
@@ -395,12 +423,15 @@ direct_declarator
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setID($1.name);
 			strcpy($$.code, $1.name);
+			setVarID($1.name);
+			nature = 0;
 		}
         | LPAR declarator RPAR
 		{
 			$$.nd = mkNode($2.nd, NULL, "(declar)");
 			sprintf(temp, "( %s )", $2.name);
 			strcpy($$.code,temp);
+			nature = 1;
 		}
         | direct_declarator LPAR parameter_list RPAR
 		{
@@ -409,6 +440,8 @@ direct_declarator
 			sprintf(temp, " %s( %s )", $1.code, $3.code);
 			strcpy($$.code, temp);
 			insert($$.code);
+			setFuncID($1.name);
+			nature = 1;
 		}
         | direct_declarator LPAR RPAR
 		{
@@ -417,6 +450,8 @@ direct_declarator
 			sprintf(temp, "%s()", $1.name);
 			strcpy($$.code, temp);
 			insert($$.code);
+			setFuncID($1.name);
+			nature = 1;
 		}
         ;
 
@@ -440,6 +475,8 @@ parameter_declaration
 			sprintf(temp, "%s %s", $1.code, $2.code);
 
 			strcpy($$.code, temp);
+			argsLen++;
+			argsType = addNewElArray(argsType, argsLen, type);
 		}
         ;
 
@@ -456,6 +493,12 @@ statement
 				sprintf(msg, "undeclared variable %s", $1.name);
 				return yyerror(msg);
 			}
+			// if (lookupvar(envVar, hash($1.name)) != NULL){
+			// 	$$.nd = $1.nd;
+			// } else {
+			// 	sprintf(msg, "undeclared variable %s", $1.name);
+			// 	yyerror(msg);
+			// }
 		}
         | selection_statement
 		{
@@ -581,12 +624,16 @@ program
 			}
 
 			
+			headArray[programNb] = $$.nd;
+			programNb++;
 		}
         | program external_declaration 
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "program");
 			char *prog = malloc(sizeof(char) * (strlen($1.code) + strlen($2.code) + 1));
 			sprintf(prog, "%s\n\n%s", $1.code, $2.code);
+			headArray[programNb] = $$.nd;
+			programNb++;
 		}
 		;
 
@@ -612,13 +659,18 @@ function_definition
 			sprintf(function, "%s %s %s", $1.code, $2.code, $3.code);
 			strcpy($$.code, function);
 			
+			envFunc = addNewFunc(envFunc, createFuncData(funcID, type, argsType, argsLen, yylineno));
 		}
         ;
 
 %%
 
-void setID(char *idVal){
-	id = strdup(idVal);
+void setVarID(char *idVal){
+	varID = strdup(idVal);
+}
+
+void setFuncID(char *idVal){
+	funcID = strdup(idVal);
 }
 
 void setType(int typeVal){
@@ -659,20 +711,39 @@ int main(int argc, char* argv[]){
     }
 
 	yyin = fopen(argv[1],"r");
+
 	if (yyin == NULL) {
 		printf("file not found: %s!\n", argv[1]);
 		return 1;
 	}
-	if(!yyparse()){
-		int *tab = malloc(sizeof(int) * 100);
-		tab = getMaxLvlLen(head, tab,  0);
-		printVarST(env);
-		/* printSyntaxTree_v2(head, tab, -1, 0, 0, 0); 
-		printSyntaxTree_v1(head, 0);  */
+
+	if (!yyparse()){
+		
+		printVarST(envVar);
+		printFuncST(envFunc);
+
+		/* Print syntax tree */
+		for (int i = 0; i < programNb; i++){
+			printDashes(25);
+			printf("Syntax Tree n%d", i + 1);
+			printDashes(25);
+
+			head = headArray[i];
+
+			/* int *tab = malloc(sizeof(int) * 100);
+			tab = getMaxLvlLen(head, tab,  0);
+			printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
+
+			printSyntaxTree_v1(head, 0);
+
+			printf("\n");
+		}
+
 		printf("\nParsing complete\n");
-	}
-	else
+	} else {
 		printf("Parsing failed\n");
+	}
+
 	fclose(yyin);
 	return 0;
 
