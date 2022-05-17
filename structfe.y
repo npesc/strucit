@@ -93,7 +93,7 @@ primary_expression
         : IDENTIFIER 
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
-			setID($1.name);
+			setVarID($1.name);
 			insert($$.code);
 			
 			setVarID($1.name);
@@ -313,7 +313,6 @@ declaration
 		{
 			
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
-			env = addNewVar(env, createVarData(id, type, yylineno));
 			sprintf(temp, "%s %s;\n",$1.code, $2.code);
 			strcpy($$.code, temp);
 			
@@ -421,7 +420,7 @@ direct_declarator
         : IDENTIFIER 
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
-			setID($1.name);
+			setVarID($1.name);
 			strcpy($$.code, $1.name);
 			setVarID($1.name);
 			nature = 0;
@@ -487,7 +486,7 @@ statement
 		}
         | expression_statement
 		{
-			if (lookupvar(env, hash($1.name)) != NULL){
+			if (lookupvar(envVar, hash($1.name)) != NULL){
 				$$.nd = $1.nd;
 			} else {
 				sprintf(msg, "undeclared variable %s", $1.name);
