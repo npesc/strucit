@@ -56,13 +56,17 @@ varEnv *addNewVar(varEnv *env, varData *data);
 funcEnv *addNewFunc(funcEnv *env, funcData *data);
 structEnv *addNewStruct(structEnv *env, structData *data);
 varEnv* lookupvar(varEnv* env, unsigned int hash);
+<<<<<<< HEAD
 funcEnv* lookupfun(funcEnv* env, unsigned int hash);
 char *getDataType(int i);
+=======
+char *getDataType(structEnv* envStruct, int i);
+>>>>>>> valentin
 char *getArgsType(int *argsType, int argsLen);
 varData *createVarData(char *id, int type, int globalFlag, int line);
 void printDashes(int n);
-void printVarST(varEnv *env);
-void printFuncST(funcEnv *env);
+void printVarST(structEnv* envS, varEnv *env);
+void printFuncST(structEnv* envS, funcEnv *env);
 structData *createStructData(char *id, int *fieldsType, int fieldsLen, char *fieldsName[100], int line);
 funcData *createFuncData(char *id, int returnType, int *argsType, int argsLen, char *paramsName[100], int line);
 void printStructST(structEnv *env);

@@ -1,7 +1,6 @@
 #include "symbolTable.h"
 #include <stdbool.h>
 
-structEnv *envStruct;
 
 int hash(unsigned char *str){
     unsigned int hash = 0;
@@ -137,7 +136,6 @@ structEnv *addNewStruct(structEnv *env, structData *data){
         tmpEnv->nextEnv = newVar; 
     }
     
-    envStruct = env;
     return env;
 }
 
@@ -169,7 +167,7 @@ char *getStructNameByHash(structEnv *envStruct, int hash){
     return "-1";
 }
 
-char *getDataType(int i){
+char *getDataType(structEnv* envStruct, int i){
     switch (i)
     {
         case 0:
@@ -185,13 +183,13 @@ char *getDataType(int i){
     }
 }
 
-char *getStringTypes(int *argsType, int argsLen){
+char *getStringTypes(structEnv* envStruct,int *argsType, int argsLen){
     char *res = NULL;
     char tmpDest[255] = "";
 
     for(int i = 0; i < argsLen; i++){
         if ((argsType + i) != NULL){
-            char *tmpChar = strdup(getDataType(*(argsType + i))); 
+            char *tmpChar = strdup(getDataType(envStruct, *(argsType + i))); 
             strcat(tmpDest, tmpChar);
 
             if (i != argsLen){
@@ -272,7 +270,7 @@ void printDashes(int n){
 	printf("\n");
 }
 
-void printVarST(varEnv *env){
+void printVarST(structEnv* envStruct, varEnv *env){
     varEnv *tmpEnv = env;
 
     printDashes(100);
@@ -283,7 +281,7 @@ void printVarST(varEnv *env){
     while(tmpEnv != NULL) {
         varData *data = tmpEnv->data;
         
-        printf("%-20s %-20d %-20s %-20d %-20d", data->id, tmpEnv->hash, getDataType(data->type), data->global, data->line);
+        printf("%-20s %-20d %-20s %-20d %-20d", data->id, tmpEnv->hash, getDataType(envStruct,data->type), data->global, data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
@@ -294,7 +292,7 @@ void printVarST(varEnv *env){
     printDashes(100);   
 }
 
-void printFuncST(funcEnv *env){
+void printFuncST(structEnv* envStruct, funcEnv *env){
     funcEnv *tmpEnv = env;
 
     printDashes(190);
@@ -305,7 +303,7 @@ void printFuncST(funcEnv *env){
     while(tmpEnv != NULL) {
         funcData *data = tmpEnv->data;
         
-        printf("%-20s %-20d %-20s %-40s %-70s %-20d", data->id, tmpEnv->hash, getDataType(data->returnType), getStringTypes(data->argsType, data->argsLen), getFieldsName(data->paramsName, data->argsLen), data->line);
+        printf("%-20s %-20d %-20s %-40s %-70s %-20d", data->id, tmpEnv->hash, getDataType(envStruct, data->returnType), getStringTypes(envStruct,data->argsType, data->argsLen), getFieldsName(data->paramsName, data->argsLen), data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
@@ -326,7 +324,7 @@ void printStructST(structEnv *env){
 
     while(tmpEnv != NULL) {
         structData *data = tmpEnv->data;
-        printf("%-20s %-20d %-70s %-70s %-20d", data->id, tmpEnv->hash, getStringTypes(data->fieldsType, data->fieldsLen), getFieldsName(data->fieldsName, data->fieldsLen), data->line);
+        printf("%-20s %-20d %-70s %-70s %-20d", data->id, tmpEnv->hash, getStringTypes(env,data->fieldsType, data->fieldsLen), getFieldsName(data->fieldsName, data->fieldsLen), data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
