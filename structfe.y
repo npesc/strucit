@@ -323,11 +323,11 @@ declaration
 				envVar = addNewVar(envVar, createVarData(varID, type, globalFlag, yylineno));
 			} else {
 				envFunc = addNewFunc(envFunc, createFuncData(funcID, typeReturn, argsType, argsLen, tmpParamsName, yylineno));
-				typeReturn = 0;
-				returnFlag = 0;
-				argsLen = 0;
-				argsType = NULL;
-				tmpParamsName = NULL;
+				// typeReturn = 0;
+				// returnFlag = 0;
+				// argsLen = 0;
+				// argsType = NULL;
+				// tmpParamsName = NULL;
 			}
 		}
         | struct_specifier SEMI
@@ -687,8 +687,8 @@ int main(int argc, char* argv[]){
 
 	if (!yyparse()){
 		
-		printVarST(envVar);
-		printFuncST(envFunc);
+		printVarST(envStruct, envVar);
+		printFuncST(envStruct, envFunc);
 		printStructST(envStruct);
 
 		/* Print syntax tree */
