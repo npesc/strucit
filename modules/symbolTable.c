@@ -1,7 +1,9 @@
 #include "symbolTable.h"
 #include <stdbool.h>
 
-unsigned long hash(unsigned char *str){
+structEnv *envStruct;
+
+int hash(unsigned char *str){
     unsigned int hash = 0;
     int c;
 
@@ -11,6 +13,7 @@ unsigned long hash(unsigned char *str){
     return hash;
 }
 
+//de sters naher
 varEnv* lookupvar(varEnv* env, unsigned int hash){
 
     while (env != NULL){
@@ -23,6 +26,48 @@ varEnv* lookupvar(varEnv* env, unsigned int hash){
     }
     printf("%d not found\n", hash);
     return NULL; 
+}
+
+int countNonGlobal(varEnv *env){
+    int count = 0; 
+    varEnv *tmp = env;
+
+    while (tmp != NULL){
+        if(tmp->data->global == 0){
+            count++;
+        }
+
+        tmp = tmp->nextEnv;
+    }
+
+    return count;
+}
+
+void deleteNonGlobal(varEnv **env){
+    while (countNonGlobal(*env) != 0){
+        deleteNonGlobal1El(env);
+    }
+}
+
+void deleteNonGlobal1El(varEnv** head_ref){
+    varEnv* temp = *head_ref;
+    varEnv* prev = NULL;
+    
+    if (temp != NULL && temp->data->global == 0){
+        *head_ref = temp->nextEnv;           
+        return;
+    } else {
+        while (temp != NULL && temp->data->global != 0)
+        {
+            prev = temp;
+            temp = temp->nextEnv;
+        }
+
+        if (temp == NULL)
+            return;
+
+        prev->nextEnv = temp->nextEnv;
+    }
 }
 
 varEnv *addNewVar(varEnv *env, varData *data){  
@@ -85,7 +130,36 @@ structEnv *addNewStruct(structEnv *env, structData *data){
         tmpEnv->nextEnv = newVar; 
     }
     
+    envStruct = env;
     return env;
+}
+
+char *getStructNameByHash(structEnv *envStruct, int hash){
+    int pointerFlag = 0;
+    structEnv *tmp = envStruct;
+    
+    if (hash < 0){
+        pointerFlag = 1;
+        hash *= -1;
+    }
+
+    while (tmp != NULL){
+        if (tmp->hash == hash) {
+
+            if (pointerFlag) {
+                char *tmpID = strdup(tmp->data->id);
+                strcat(tmpID, "*");
+                return tmpID;
+            } else {
+                return tmp->data->id;
+            }
+
+        }
+
+        tmp = tmp->nextEnv;
+    }
+
+    return "-1";
 }
 
 char *getDataType(int i){
@@ -95,16 +169,16 @@ char *getDataType(int i){
             return "VOID";
         case 1:
             return "INT";
-        case 2:
-            return "*STRUCT";
-        case 3:
+        case -1:
+            return "INT*";
+        case -2:
             return "*FUNC";
-        case 4:
-            return "*INT";
+        default:
+            return getStructNameByHash(envStruct, i);
     }
 }
 
-char *getArgsType(int *argsType, int argsLen){
+char *getStringTypes(int *argsType, int argsLen){
     char *res = NULL;
     char tmpDest[255] = "";
 
@@ -124,29 +198,61 @@ char *getArgsType(int *argsType, int argsLen){
     return res;
 }
 
-varData *createVarData(char *id, int type, int line){
+char *getFieldsName(char **fieldsName, int len){
+    char *res = NULL;
+    char tmpDest[255] = "";
+
+    for(int i = 0; i < len; i++){
+        if ((fieldsName + i) != NULL){
+            char *tmpChar = strdup(*(fieldsName + i)); 
+            strcat(tmpDest, tmpChar);
+
+            if (i != len){
+                strcat(tmpDest, " ");
+            }
+
+            res = strdup(tmpDest);
+        }
+    }
+
+    return res;
+}
+
+varData *createVarData(char *id, int type, int globalFlag, int line){
     varData *tmpVarData = malloc(sizeof(varData));
     tmpVarData->id = strdup(id);
     tmpVarData->type = type;
+    tmpVarData->global = globalFlag;
     tmpVarData->line = line;
 
     return tmpVarData;
 }
 
-structData *createStructData(char *id, int *argsType, int line){
+structData *createStructData(char *id, int *fieldsType, int fieldsLen, char *fieldsName[100], int line){
     structData *tmpStructData = malloc(sizeof(structData));
     tmpStructData->id = strdup(id);
-    tmpStructData->argsType = argsType;
+    tmpStructData->fieldsType = fieldsType;
+    tmpStructData->fieldsLen = fieldsLen;
+
+    for (int i = 0; i < fieldsLen; i++){
+        tmpStructData->fieldsName[i] = strdup(fieldsName[i]);
+    }
+
     tmpStructData->line = line;
     return tmpStructData;
 }
 
-funcData *createFuncData(char *id, int returnType, int *argsType, int argsLen, int line){
+funcData *createFuncData(char *id, int returnType, int *argsType, int argsLen, char *paramsName[100], int line){
     funcData *tmpFuncData = malloc(sizeof(funcData));
     tmpFuncData->id = strdup(id);
     tmpFuncData->returnType = returnType;
     tmpFuncData->argsType = argsType;
     tmpFuncData->argsLen = argsLen;
+
+    for (int i = 0; i < argsLen; i++){
+        tmpFuncData->paramsName[i] = strdup(paramsName[i]);
+    }
+    
     tmpFuncData->line = line;
     return tmpFuncData;
 }
@@ -162,15 +268,15 @@ void printDashes(int n){
 void printVarST(varEnv *env){
     varEnv *tmpEnv = env;
 
-    printDashes(80);
+    printDashes(100);
     printf("VARIABLE SYMBOL TABLE");
-    printDashes(80);
-    printf("%-20s %-20s %-20s %-20s\n", "ID", "HASH", "TYPE", "LINE");
+    printDashes(100);
+    printf("%-20s %-20s %-20s %-20s %-20s\n", "ID", "HASH", "TYPE", "GLOBAL_FLAG", "LINE");
 
     while(tmpEnv != NULL) {
         varData *data = tmpEnv->data;
         
-        printf("%-20s %-20d %-20s %-20d", data->id, tmpEnv->hash, getDataType(data->type), data->line);
+        printf("%-20s %-20d %-20s %-20d %-20d", data->id, tmpEnv->hash, getDataType(data->type), data->global, data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
@@ -178,21 +284,21 @@ void printVarST(varEnv *env){
 
         tmpEnv = tmpEnv->nextEnv;
     }
-    printDashes(80);   
+    printDashes(100);   
 }
 
 void printFuncST(funcEnv *env){
     funcEnv *tmpEnv = env;
 
-    printDashes(150);
+    printDashes(190);
     printf("FUNCTION SYMBOL TABLE");
-    printDashes(150);
-    printf("%-20s %-20s %-20s %-70s %-20s\n", "ID", "HASH", "RETURN_TYPE", "ARGS_TYPE", "LINE");
+    printDashes(190);
+    printf("%-20s %-20s %-20s %-40s %-70s %-20s\n", "ID", "HASH", "RETURN_TYPE", "ARGS_TYPE", "ARGS_NAME", "LINE");
 
     while(tmpEnv != NULL) {
         funcData *data = tmpEnv->data;
         
-        printf("%-20s %-20d %-20s %-70s %-20d", data->id, tmpEnv->hash, getDataType(data->returnType), getArgsType(data->argsType, data->argsLen), data->line);
+        printf("%-20s %-20d %-20s %-40s %-70s %-20d", data->id, tmpEnv->hash, getDataType(data->returnType), getStringTypes(data->argsType, data->argsLen), getFieldsName(data->paramsName, data->argsLen), data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
@@ -200,21 +306,20 @@ void printFuncST(funcEnv *env){
 
         tmpEnv = tmpEnv->nextEnv;
     }
-    printDashes(150);   
+    printDashes(190);   
 }
 
 void printStructST(structEnv *env){
     structEnv *tmpEnv = env;
 
-    printDashes(130);
+    printDashes(200);
     printf("STRUCT SYMBOL TABLE");
-    printDashes(130);
-    printf("%-20s %-20s %-70s %-20s\n", "ID", "HASH", "ARGS_TYPE", "LINE");
+    printDashes(200);
+    printf("%-20s %-20s %-70s %-70s %-20s\n", "ID", "HASH", "FIELDS_TYPE", "FIELDS_NAME", "LINE");
 
     while(tmpEnv != NULL) {
         structData *data = tmpEnv->data;
-        
-        printf("%-20s %-20d %-70s %-20d", data->id, tmpEnv->hash, getArgsType(data->argsType, data->argsLen), data->line);
+        printf("%-20s %-20d %-70s %-70s %-20d", data->id, tmpEnv->hash, getStringTypes(data->fieldsType, data->fieldsLen), getFieldsName(data->fieldsName, data->fieldsLen), data->line);
 
         if (tmpEnv->nextEnv != NULL){
             printf("\n");
@@ -222,63 +327,26 @@ void printStructST(structEnv *env){
 
         tmpEnv = tmpEnv->nextEnv;
     }
-    printDashes(130);   
+    printDashes(200);   
 }
 
-// int main(int argc, char *argv[]) {
-    // varData *data1 = malloc(sizeof(varData));
-    // varData *data2 = malloc(sizeof(varData));
-    // varData *data3 = malloc(sizeof(varData));
+//SEMANTICS PARTS -> need to add in a new FILE after
 
-    // data1->id = strdup("var1");
-    // data2->id = strdup("var2");
-    // data3->id = strdup("var3");
-    
-    // data1->type = 1;
-    // data2->type = 3;
-    // data3->type = 2;
-     
-    // data1->line = 23;
-    // data2->line = 12;
-    // data3->line = 5;
 
-    // varEnv *env1;
+// BOOL : 
+//     0 -> false
+//     1 -> true
 
-    // env1 = addNewVar(env1, data1);
-    // env1 = addNewVar(env1, data2);
-    // env1 = addNewVar(env1, data3);
+int checkVarExists(varEnv *env, int hash){
+    varEnv *tmp = env;
 
-    // printVarST(env1);
+    while(tmp != NULL){
+        if (tmp->hash == hash){
+            return 1;
+        }
+        
+        tmp = tmp->nextEnv;
+    }   
 
-//     int type1[] = {3, 2, 3};
-//     int type2[] = {2, 2, 3};
-//     int type3[] = {3, 2, 3};
-
-//     funcData *dataF1 = malloc(sizeof(funcData));
-//     funcData *dataF2 = malloc(sizeof(funcData));
-//     funcData *dataF3 = malloc(sizeof(funcData));
-
-//     dataF1->argsType = type1;
-//     dataF1->id = strdup("func1");
-//     dataF1->line = 12;
-//     dataF1->returnType = 3;
-
-//     dataF2->argsType = type2;
-//     dataF2->id = strdup("func2");
-//     dataF2->line = 32;
-//     dataF2->returnType = 1;
-
-//     dataF3->argsType = type3;
-//     dataF3->id = strdup("func3");
-//     dataF3->line = 5;
-//     dataF3->returnType = 2;
-
-//     funcEnv *fEnv = NULL;
-
-//     fEnv = addNewFunc(fEnv, dataF1);
-//     fEnv = addNewFunc(fEnv, dataF2);
-//     fEnv = addNewFunc(fEnv, dataF3);
-
-//     printFuncST(fEnv);
-    
-// }
+    return 0;
+}

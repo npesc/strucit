@@ -11,27 +11,38 @@
 	int yyerror(char *msg);
 	int yywrap();
 
-    extern int countn;
 	extern FILE *fp;
 	extern FILE* yyin;
 	extern int yylineno;
-	extern char yytext[];
+	extern int countn;
 	extern int comacc;
+	extern char yytext[];
 	
+	struct node *head;
+	struct node *headArray[100];
 	
-	char msg[200];
-	int type;
+	// char msg[200];
+	int type; //data type
+	int typeReturn; //return data type
+	int returnFlag = 0;
+	int globalFlag = 1;
 	int *argsType;
 	int nature = -1; //flag to determine if we declared a variable or a fuction
 	int argsLen = 0; //count number of argument on function definition
 
 	int programNb = 0; //count program start
-	struct node *headArray[100];
+	
 
 	char *varID; //variable's identifier
 	char *funcID; //function's identifier 
+	char *structID; //structure's identifier
 
-    struct node *head;
+	int fieldsLen = 0; //count number of structure's field
+		
+	int *tmpFieldsType; //variable used to stock fields type of structure
+	char **tmpFieldsName; //variable used to stock fields name of structure
+	char **tmpParamsName; //variable used to stock params name of function
+
 
 	varEnv *envVar;
 	structEnv *envStruct;
@@ -39,12 +50,14 @@
 
 	void setVarID(char *idVal);
 	void setFuncID(char *idVal);
+	void setStructID(char *idVal);
 	void setType(int typeVal);
 	void convertToPointer(void);
 
 	// nature :
 	// 	0 -> variable
 	// 	1 -> function
+	// 	2 -> structure
 %}
 
 %union { 
@@ -297,6 +310,7 @@ expression
         | unary_expression EG expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "=");
+			printf("\ntest here : %s", funcID);
 		}
         ;
 
@@ -306,16 +320,23 @@ declaration
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
 
 			if (nature == 0){
-				envVar = addNewVar(envVar, createVarData(varID, type, yylineno));
+				envVar = addNewVar(envVar, createVarData(varID, type, globalFlag, yylineno));
 			} else {
-				envFunc = addNewFunc(envFunc, createFuncData(funcID, type, argsType, argsLen, yylineno));
+				envFunc = addNewFunc(envFunc, createFuncData(funcID, typeReturn, argsType, argsLen, tmpParamsName, yylineno));
+				typeReturn = 0;
+				returnFlag = 0;
 				argsLen = 0;
 				argsType = NULL;
+				tmpParamsName = NULL;
 			}
 		}
         | struct_specifier SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "declarStruct");
+			envStruct = addNewStruct(envStruct, createStructData(structID, tmpFieldsType, fieldsLen, tmpFieldsName, yylineno));
+			tmpFieldsType = NULL;
+			fieldsLen = 0;
+			tmpFieldsName = NULL;
 		}
         ;
 
@@ -345,7 +366,6 @@ type_specifier
         | struct_specifier
 		{
 			$$.nd = $1.nd;
-			// setType(2);
 		}
         ;
 
@@ -353,7 +373,10 @@ struct_specifier
         : STRUCT IDENTIFIER LBR struct_declaration_list RBR
 		{
 			struct node *tmp = mkNode(NULL, NULL, $2.name);
-			$$.nd = mkNode(tmp, $4.nd, "structSpecID");
+			$$.nd = mkNode(tmp, $4.nd, "structSpecID{...}");
+			
+			setStructID($2.name);
+			setType(hash(structID));
 		}
         | STRUCT LBR struct_declaration_list RBR
 		{
@@ -363,6 +386,9 @@ struct_specifier
 		{
 			struct node *tmp = mkNode(NULL, NULL, $2.name);
 			$$.nd = mkNode(tmp, NULL, "structSpecID");
+
+			setStructID($2.name);
+			setType(hash(structID));
 		}
         ;
 
@@ -381,6 +407,9 @@ struct_declaration
         : type_specifier declarator SEMI 
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "structDeclar");
+			fieldsLen++;
+			tmpFieldsType = addNewIntArray(tmpFieldsType, fieldsLen, type);
+			tmpFieldsName = addNewCharArray(tmpFieldsName, fieldsLen, structID);
 		}
         ;
 
@@ -388,6 +417,10 @@ declarator
         : STAR direct_declarator 
 		{
 			$$.nd = mkNode($2.nd, NULL, "*declar");
+
+			if (nature == 1){
+				returnFlag = -1;
+			}
 			convertToPointer();
 		}
         | direct_declarator
@@ -401,6 +434,7 @@ direct_declarator
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setVarID($1.name);
+			setStructID($1.name);
 			nature = 0;
 		}
         | LPAR declarator RPAR
@@ -413,12 +447,14 @@ direct_declarator
 			$$.nd = mkNode($1.nd, $3.nd, "directDeclar(...)");
 			setFuncID($1.name);
 			nature = 1;
+			globalFlag = 0;
 		}
         | direct_declarator LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
 			setFuncID($1.name);
 			nature = 1;
+			globalFlag = 0;
 		}
         ;
 
@@ -438,7 +474,8 @@ parameter_declaration
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "paramDeclar");
 			argsLen++;
-			argsType = addNewElArray(argsType, argsLen, type);
+			argsType = addNewIntArray(argsType, argsLen, type);
+			tmpParamsName = addNewCharArray(tmpParamsName, argsLen, funcID);
 		}
         ;
 
@@ -565,6 +602,7 @@ program
 			$$.nd = mkNode($1.nd, NULL, "program");
 			headArray[programNb] = $$.nd;
 			programNb++;
+			returnFlag = 0;
 		}
         | program external_declaration 
 		{
@@ -591,7 +629,16 @@ function_definition
 			struct node *sign = mkNode($1.nd, $2.nd, "funcSign");
 			struct node *stmts = mkNode($3.nd, NULL, "stmts");
 			$$.nd = mkNode(sign, stmts, "functionDef");
-			envFunc = addNewFunc(envFunc, createFuncData(funcID, type, argsType, argsLen, yylineno));
+
+			envFunc = addNewFunc(envFunc, createFuncData(funcID, type, argsType, argsLen, tmpParamsName, yylineno));
+			typeReturn = 0;
+			returnFlag = 0;
+			argsLen = 0;
+			globalFlag = 1;
+			argsType = NULL;
+			tmpParamsName = NULL;
+
+			deleteNonGlobal(&envVar);
 		}
         ;
 
@@ -605,15 +652,22 @@ void setFuncID(char *idVal){
 	funcID = strdup(idVal);
 }
 
+void setStructID(char *idVal){
+	structID = strdup(idVal);
+}
+
 void setType(int typeVal){
 	type = typeVal;
+	if (returnFlag == 0){
+		typeReturn = typeVal;
+		returnFlag = -2;
+	}
 }
 
 void convertToPointer(){
-	switch (type){
-		case 1:
-			type = 4;
-			break;
+	type *= -1;
+	if (returnFlag == -1){ 
+		typeReturn *= -1;
 	}
 }
 
@@ -635,6 +689,7 @@ int main(int argc, char* argv[]){
 		
 		printVarST(envVar);
 		printFuncST(envFunc);
+		printStructST(envStruct);
 
 		/* Print syntax tree */
 		for (int i = 0; i < programNb; i++){
@@ -644,11 +699,11 @@ int main(int argc, char* argv[]){
 
 			head = headArray[i];
 
-			/* int *tab = malloc(sizeof(int) * 100);
+			int *tab = malloc(sizeof(int) * 100);
 			tab = getMaxLvlLen(head, tab,  0);
-			printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
+			printSyntaxTree_v2(head, tab, -1, 0, 0, 0); 
 
-			printSyntaxTree_v1(head, 0);
+			/* printSyntaxTree_v1(head, 0); */
 
 			printf("\n");
 		}

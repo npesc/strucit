@@ -4,4 +4,5 @@
 
 void printSpace(int c, int nbNL);
 int getIntLen(int n);
-int *addNewElArray(int *tab, int size, int newVal);
+int *addNewIntArray(int *tab, int size, int newVal);
+char **addNewCharArray(char **tab, int size, char *newEl);
