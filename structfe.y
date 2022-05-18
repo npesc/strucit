@@ -18,7 +18,6 @@
 	extern int comacc;
 	FILE* out;
 	
-	char temp[200];
 	char msg[200];
 	int type;
 	int *argsType;
@@ -94,9 +93,6 @@ primary_expression
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setVarID($1.name);
-			insert($$.code);
-			
-			setVarID($1.name);
 		}
         | CONSTANT
 		{
@@ -105,7 +101,6 @@ primary_expression
         | LPAR expression RPAR
 		{
 			$$.nd = $2.nd;
-
 		}
         ;
 
@@ -311,12 +306,10 @@ expression
 declaration
         : declaration_specifiers declarator SEMI
 		{
-			
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
+			char temp[100];
 			sprintf(temp, "%s %s;\n",$1.code, $2.code);
-			strcpy($$.code, temp);
-			
-
+			strcat($$.code, temp);
 			if (nature == 0){
 				envVar = addNewVar(envVar, createVarData(varID, type, yylineno));
 			} else {
@@ -324,6 +317,7 @@ declaration
 				argsLen = 0;
 				argsType = NULL;
 			}
+			
 		}
         | struct_specifier SEMI
 		{
@@ -336,14 +330,15 @@ declaration_specifiers
 		{
 			struct node *tmp = mkNode(NULL, NULL, "extern");
 			$$.nd = mkNode(tmp, $2.nd, "declarSpecif");
-			char* temp = malloc(sizeof(char) * (strlen($1.name) + strlen($2.code) + 1));
-			sprintf(temp, "extern %s", $2.code);
-			strcpy($$.code, temp);
+			char temp[100];
+			sprintf(temp, "extern %s ", $2.code);
+			strcat($$.code, temp);
 			insert($$.code);
 		}
         | type_specifier
 		{
 			$$.nd = $1.nd;
+			sprintf($$.code, $1.code);
 		}
         ;
 
@@ -358,7 +353,7 @@ type_specifier
 		{
 			$$.nd = mkNode(NULL, NULL, "int");
 			setType(1);
-			strcpy($$.code, $1.name);
+			strcat($$.code, $1.name);
 		}
         | struct_specifier
 		{
@@ -412,7 +407,7 @@ declarator
         | direct_declarator
 		{
 			$$.nd = $1.nd;
-			strcpy($$.code, $1.name);
+			sprintf($$.code, $1.name);
 		}
         ;
 
@@ -421,35 +416,37 @@ direct_declarator
 		{
 			$$.nd = mkNode(NULL, NULL, $1.name);
 			setVarID($1.name);
-			strcpy($$.code, $1.name);
-			setVarID($1.name);
 			nature = 0;
 		}
         | LPAR declarator RPAR
 		{
 			$$.nd = mkNode($2.nd, NULL, "(declar)");
-			sprintf(temp, "( %s )", $2.name);
-			strcpy($$.code,temp);
+			sprintf($$.code, "( %s )", $2.name);
+			insert($$.code);
 			nature = 1;
 		}
         | direct_declarator LPAR parameter_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "directDeclar(...)");
-			
-			sprintf(temp, " %s( %s )", $1.code, $3.code);
-			strcpy($$.code, temp);
-			insert($$.code);
 			setFuncID($1.name);
+			sprintf($$.code, "( %s );\n", $3.code);
+			insert($$.code);
 			nature = 1;
 		}
         | direct_declarator LPAR RPAR
 		{
 			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
-			char* temp = malloc(sizeof(char) * 50);
-			sprintf(temp, "%s()", $1.name);
-			strcpy($$.code, temp);
-			insert($$.code);
 			setFuncID($1.name);
+			funcEnv* res = malloc(sizeof(lookupfun(envFunc, hash($1.name))));
+			res = lookupfun(envFunc, hash($1.name));
+			printf("%d \n", res);
+
+			// switch (res->data->returnType){
+			// 	case(1):
+			// 		sprintf($$.code,"int %s", res->data->id);
+			// 		insert($$.code);
+			// 		break;
+			// }
 			nature = 1;
 		}
         ;
@@ -458,8 +455,8 @@ parameter_list
         : parameter_declaration
 		{
 			$$.nd = $1.nd;
-			sprintf($$.code, $1.code);
-			
+			strcpy($$.code, $1.code);
+
 		}
         | parameter_list COMMA parameter_declaration
 		{
@@ -471,9 +468,8 @@ parameter_declaration
         : declaration_specifiers declarator
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "paramDeclar");
-			sprintf(temp, "%s %s", $1.code, $2.code);
-
-			strcpy($$.code, temp);
+			char temp[100];
+			sprintf($$.code, "%s %s", $1.code, $2.code);
 			argsLen++;
 			argsType = addNewElArray(argsType, argsLen, type);
 		}
@@ -483,20 +479,15 @@ statement
         : compound_statement
 		{
 			$$.nd = $1.nd;
+			sprintf($$.code, $1.code);
 		}
         | expression_statement
 		{
-			if (lookupvar(envVar, hash($1.name)) != NULL){
-				$$.nd = $1.nd;
-			} else {
-				sprintf(msg, "undeclared variable %s", $1.name);
-				return yyerror(msg);
-			}
 			// if (lookupvar(envVar, hash($1.name)) != NULL){
 			// 	$$.nd = $1.nd;
 			// } else {
 			// 	sprintf(msg, "undeclared variable %s", $1.name);
-			// 	yyerror(msg);
+			// 	return yyerror(msg);
 			// }
 		}
         | selection_statement
@@ -517,7 +508,7 @@ compound_statement
         : LBR RBR
 		{
 			$$.nd = mkNode(NULL, NULL, "stmts{}");
-			strcpy($$.code, "{}");
+			sprintf($$.code, "{}");
 			
 		}
         | LBR statement_list RBR
@@ -546,10 +537,9 @@ declaration_list
         | declaration_list declaration
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "declarList");
-			sprintf(temp, "\t%s\t%s", $1.code, $2.code);
-			strcpy($$.code, temp);
-			insert($$.code);
+			sprintf($$.code, "\n\t%s\t%s", $1.code, $2.code);
 		}
+		
         ;
 
 statement_list
@@ -558,8 +548,7 @@ statement_list
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "stmtsList");
 			char* temp = malloc(sizeof(int) * (strlen($1.code) + strlen($2.code)));
-			sprintf(temp, "%s\n\t%s", $1.code, $2.code);
-			strcpy($$.code, temp);
+			sprintf($$.code, "%s\n\t%s", $1.code, $2.code);
 		}
         ;
 
@@ -567,13 +556,12 @@ expression_statement
         : SEMI
 		{
 			$$.nd = mkNode(NULL, NULL, ";");
-			
+			sprintf($$.code, ";");
 		}
         | expression SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "expr");
-			sprintf(temp, "%s;", $1.code);
-			strcpy($$.code,temp);
+			sprintf($$.code, "%s;", $1.code);
 			}
         ;
 
@@ -621,16 +609,12 @@ program
 			if (head == NULL) {
 				head = $$.nd;
 			}
-
-			
 			headArray[programNb] = $$.nd;
 			programNb++;
 		}
         | program external_declaration 
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "program");
-			char *prog = malloc(sizeof(char) * (strlen($1.code) + strlen($2.code) + 1));
-			sprintf(prog, "%s\n\n%s", $1.code, $2.code);
 			headArray[programNb] = $$.nd;
 			programNb++;
 		}
@@ -640,6 +624,7 @@ external_declaration
         : function_definition
 		{
 			$$.nd = $1.nd;
+			printf("%s   eee\n", $$.code);
 		}
         | declaration
         {
@@ -653,11 +638,6 @@ function_definition
 			struct node *sign = mkNode($1.nd, $2.nd, "funcSign");
 			struct node *stmts = mkNode($3.nd, NULL, "stmts");
 			$$.nd = mkNode(sign, stmts, "functionDef");
-
-			char *function = malloc(sizeof(int) * (strlen($1.code) + strlen($2.code) + strlen($3.code) + 1));
-			sprintf(function, "%s %s %s", $1.code, $2.code, $3.code);
-			strcpy($$.code, function);
-			
 			envFunc = addNewFunc(envFunc, createFuncData(funcID, type, argsType, argsLen, yylineno));
 		}
         ;
@@ -720,6 +700,9 @@ int main(int argc, char* argv[]){
 		
 		printVarST(envVar);
 		printFuncST(envFunc);
+		 int *tab = malloc(sizeof(int) * 100);
+		tab = getMaxLvlLen(head, tab,  0); 
+		printSyntaxTree_v2(head, tab, -1, 0, 0, 0);   
 
 		/* Print syntax tree */
 		for (int i = 0; i < programNb; i++){
@@ -729,12 +712,9 @@ int main(int argc, char* argv[]){
 
 			head = headArray[i];
 
-			/* int *tab = malloc(sizeof(int) * 100);
-			tab = getMaxLvlLen(head, tab,  0);
-			printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
-
-			printSyntaxTree_v1(head, 0);
-
+			 int *tab = malloc(sizeof(int) * 100);
+			tab = getMaxLvlLen(head, tab,  0); 
+			printSyntaxTree_v2(head, tab, -1, 0, 0, 0);   
 			printf("\n");
 		}
 

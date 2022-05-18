@@ -64,8 +64,6 @@ L                       [a-zA-Z_]
 ","                     { strcpy(yylval.ndObj.name, (yytext)); return COMMA; }
 
 
-"\n"                    { yylineno++; }
-
 [ \t\v\n\f]             { }
 .                       { printf("%s", yytext);}
 

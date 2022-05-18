@@ -1,2 +1,1 @@
-extern int printd( int z )main()	int i;
-	int j;
+extern int ( int z );

@@ -21,6 +21,16 @@ varEnv* lookupvar(varEnv* env, unsigned int hash){
     }
     return NULL; 
 }
+funcEnv* lookupfun(funcEnv* env, unsigned int hash){
+    while (env != NULL){
+        if (env->hash == hash) {
+            return env;
+        } else {
+            env = env->nextEnv;
+        }
+    }
+    return NULL; 
+}
 
 varEnv *addNewVar(varEnv *env, varData *data){  
     varEnv *tmpEnv = env;

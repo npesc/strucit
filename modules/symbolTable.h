@@ -53,6 +53,7 @@ varEnv *addNewVar(varEnv *env, varData *data);
 funcEnv *addNewFunc(funcEnv *env, funcData *data);
 structEnv *addNewStruct(structEnv *env, structData *data);
 varEnv* lookupvar(varEnv* env, unsigned int hash);
+funcEnv* lookupfun(funcEnv* env, unsigned int hash);
 char *getDataType(int i);
 char *getArgsType(int *argsType, int argsLen);
 varData *createVarData(char *id, int type, int line);
