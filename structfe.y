@@ -22,7 +22,7 @@
 	struct node *head;
 	struct node *headArray[100];
 	
-	// char msg[200];
+	char msg[200];
 	int type; //data type
 	int typeReturn; //return data type
 	int returnFlag = 0;
@@ -132,6 +132,8 @@ postfix_expression
         | postfix_expression LPAR argument_expression_list RPAR
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "func(...)");
+			printf("EEE %s \n",$3.nd->token);
+
 		}
         | postfix_expression '.' IDENTIFIER
 		{
@@ -140,6 +142,7 @@ postfix_expression
         | postfix_expression PTR_OP IDENTIFIER
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "struct->id");
+			// check for fields in struct
 		}
         ;
 
@@ -147,10 +150,13 @@ argument_expression_list
         : expression
 		{
 			$$.nd = $1.nd;
+			sprintf($$.code, $1.code);
 		}
         | argument_expression_list COMMA expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "argExpList");
+			sprintf($$.code, $3.code);
+
 		}
         ;
 
@@ -240,6 +246,22 @@ additive_expression
         | additive_expression PLUS multiplicative_expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "+");
+
+			int t1, t2;
+			if (atoi($1.name) == 0){
+				if(lookupvar(envVar, hash($1.name)) != NULL){
+					t1 = lookupvar(envVar, hash($1.name))->data->value;
+					printf("%d \n", t1);
+
+				}
+			}
+			
+			if ( (atoi($1.name) != 0) && (atoi($3.name) != 0)){
+				$$.nd = mkNode($1.nd, $3.nd, "+");
+			}else {
+				return yyerror("");
+			}
+
 		}
         | additive_expression MINUS multiplicative_expression
 		{
@@ -315,7 +337,14 @@ expression
         | unary_expression EG expression
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "=");
-			printf("\ntest here : %s", funcID);
+
+			// varEnv* tmp = lookupvar(envVar, hash($1.nd->token));
+			// if (atoi($3.nd->token) != 0){
+			// 	addNewVar(envVar, createVarData($3.nd->token, tmp->data->type, atoi($3.nd->token),tmp->data->global, yylineno));
+			// }else{
+			// 	if (strlen($3.nd->token) > 0){
+			// 	sprintf(msg, "assigning non integer value to %s", $3.nd->token);
+			// 	return yyerror(msg);}}
 		}
         ;
 
@@ -326,15 +355,31 @@ declaration
 			char temp[100];
 			sprintf(temp, "%s %s;\n",$1.code, $2.code);
 			strcat($$.code, temp);
+			printf("%s ", $2.name);
+			
 			if (nature == 0){
-				envVar = addNewVar(envVar, createVarData(varID, type, globalFlag, yylineno));
+				varEnv* tmp = lookupvar(envVar, hash($2.name));
+				if (tmp != NULL){
+					sprintf(msg, "variable %s already defined at line %d", tmp->data->id, tmp->data->line);
+					return yyerror(msg);
+				}
+				else
+				envVar = addNewVar(envVar, createVarData(varID, type, hash("extern"), globalFlag, yylineno));
+				
 			} else {
-				envFunc = addNewFunc(envFunc, createFuncData(funcID, typeReturn, argsType, argsLen, tmpParamsName, yylineno));
-				// typeReturn = 0;
-				// returnFlag = 0;
-				// argsLen = 0;
-				// argsType = NULL;
-				// tmpParamsName = NULL;
+				funcEnv* tmp = lookupfun(envFunc, hash($2.name));
+				if (tmp != NULL){
+					sprintf(msg, "function %s already defined at line %d", tmp->data->id, tmp->data->line);
+					return yyerror(msg);
+				}
+				else{
+					envFunc = addNewFunc(envFunc, createFuncData(funcID, typeReturn, argsType, argsLen, tmpParamsName, yylineno));
+					typeReturn = 0;
+					returnFlag = 0;
+					argsLen = 0;
+					argsType = NULL;
+					tmpParamsName = NULL;
+				}
 			}
 			
 		}
@@ -499,6 +544,7 @@ parameter_list
         | parameter_list COMMA parameter_declaration
 		{
 			$$.nd = mkNode($1.nd, $3.nd, "paramList");
+			
 		}
         ;
 
@@ -510,7 +556,7 @@ parameter_declaration
 			sprintf($$.code, "%s %s", $1.code, $2.code);
 			argsLen++;
 			argsType = addNewIntArray(argsType, argsLen, type);
-			tmpParamsName = addNewCharArray(tmpParamsName, argsLen, funcID);
+			tmpParamsName = addNewCharArray(tmpParamsName, argsLen, varID);
 		}
         ;
 
@@ -522,12 +568,15 @@ statement
 		}
         | expression_statement
 		{
-			// if (lookupvar(envVar, hash($1.name)) != NULL){
-			// 	$$.nd = $1.nd;
-			// } else {
-			// 	sprintf(msg, "undeclared variable %s", $1.name);
-			// 	return yyerror(msg);
-			// }
+
+			if ((lookupvar(envVar, hash($1.name)) != NULL) ||
+				(lookupfun(envFunc, hash($1.name))!= NULL) || 
+				(getStructNameByHash(envStruct, hash($1.name)) == "-1")){
+				$$.nd = $1.nd;
+			} else {
+				sprintf(msg, "undeclared identifier %s", $1.name);
+				return yyerror(msg);
+			}
 		}
         | selection_statement
 		{
@@ -586,8 +635,9 @@ statement_list
         | statement_list statement
 		{
 			$$.nd = mkNode($1.nd, $2.nd, "stmtsList");
-			char* temp = malloc(sizeof(int) * (strlen($1.code) + strlen($2.code)));
-			sprintf($$.code, "%s\n\t%s", $1.code, $2.code);
+			char temp[100];
+			sprintf(temp, "%s\n\t%s", $1.code, $2.code);
+			strcat($$.code,temp);
 		}
         ;
 
@@ -596,11 +646,12 @@ expression_statement
 		{
 			$$.nd = mkNode(NULL, NULL, ";");
 			sprintf($$.code, ";");
+		
 		}
         | expression SEMI
 		{
 			$$.nd = mkNode($1.nd, NULL, "expr");
-			sprintf($$.code, "%s;", $1.code);
+			strcat($$.code,$1.code);		
 			}
         ;
 
@@ -664,7 +715,6 @@ external_declaration
         : function_definition
 		{
 			$$.nd = $1.nd;
-			printf("%s   eee\n", $$.code);
 		}
         | declaration
         {
@@ -756,10 +806,9 @@ int main(int argc, char* argv[]){
 		
 		printVarST(envStruct, envVar);
 		printFuncST(envStruct, envFunc);
-		printStructST(envStruct);
 
 		/* Print syntax tree */
-		for (int i = 0; i < programNb; i++){
+		/* for (int i = 0; i < programNb; i++){
 			printDashes(25);
 			printf("Syntax Tree n%d", i + 1);
 			printDashes(25);
@@ -770,10 +819,10 @@ int main(int argc, char* argv[]){
 			tab = getMaxLvlLen(head, tab,  0);
 			printSyntaxTree_v2(head, tab, -1, 0, 0, 0); 
 
-			/* printSyntaxTree_v1(head, 0); */
+			printSyntaxTree_v1(head, 0); 
 
 			printf("\n");
-		}
+		} */
 
 		printf("\nParsing complete\n");
 	} else {

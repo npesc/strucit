@@ -223,10 +223,11 @@ char *getFieldsName(char **fieldsName, int len){
     return res;
 }
 
-varData *createVarData(char *id, int type, int globalFlag, int line){
+varData *createVarData(char *id, int type, int value, int globalFlag, int line){
     varData *tmpVarData = malloc(sizeof(varData));
     tmpVarData->id = strdup(id);
     tmpVarData->type = type;
+    tmpVarData->value = hash("extern");
     tmpVarData->global = globalFlag;
     tmpVarData->line = line;
 

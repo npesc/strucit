@@ -12,6 +12,7 @@
 typedef struct varData{
     char *id;
     int type;
+    int value;
     int global;
     int line;
 } varData;
@@ -56,9 +57,10 @@ varEnv *addNewVar(varEnv *env, varData *data);
 funcEnv *addNewFunc(funcEnv *env, funcData *data);
 structEnv *addNewStruct(structEnv *env, structData *data);
 varEnv* lookupvar(varEnv* env, unsigned int hash);
+funcEnv* lookupfun(funcEnv* env, unsigned int hash);
 char *getDataType(structEnv* envStruct, int i);
 char *getArgsType(int *argsType, int argsLen);
-varData *createVarData(char *id, int type, int globalFlag, int line);
+varData *createVarData(char *id, int type, int value, int globalFlag, int line);
 void printDashes(int n);
 void printVarST(structEnv* envS, varEnv *env);
 void printFuncST(structEnv* envS, funcEnv *env);
@@ -68,5 +70,4 @@ void printStructST(structEnv *env);
 void deleteNonGlobal(varEnv **env);
 void deleteNonGlobal1El(varEnv** head_ref);
 int countNonGlobal(varEnv *env);
-
-//SEMANTICS PARTS -> need to add in a new FILE after
+char *getStructNameByHash(structEnv *envStruct, int hash);
