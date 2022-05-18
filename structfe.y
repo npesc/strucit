@@ -474,9 +474,9 @@ direct_declarator
 		{
 			$$.nd = mkNode($1.nd, NULL, "directDeclar()");
 			setFuncID($1.name);
-			funcEnv* res = malloc(sizeof(lookupfun(envFunc, hash($1.name))));
-			res = lookupfun(envFunc, hash($1.name));
-			printf("%d \n", res);
+			// funcEnv* res = malloc(sizeof(lookupfun(envFunc, hash($1.name))));
+			// res = lookupfun(envFunc, hash($1.name));
+			// printf("%d \n", res);
 
 			// switch (res->data->returnType){
 			// 	case(1):
