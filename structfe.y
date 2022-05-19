@@ -770,7 +770,7 @@ program
 		{
 			sprintf($$.code, "%s", $1.code);
 			$$.nd = mkNode($1.nd, NULL, "program");
-
+			generatedCode = replaceWord($$.code, "  ", " ");
 			headArray[programNb] = $$.nd;
 			programNb++;
 			returnFlag = 0;
@@ -886,7 +886,7 @@ int main(int argc, char* argv[]){
 
 	if (!yyparse()){
 		/* writeFile(generatedCode); */
-		
+		printf("\nResultat:\n%s", generatedCode);
 		printVarST(envStruct, envVar);
 		printFuncST(envStruct, envFunc);
 		printStructST(envStruct);
