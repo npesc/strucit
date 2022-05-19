@@ -33,7 +33,7 @@ void printSyntaxTree_v2(struct node *tree, int *tab, int precCode, int curCode, 
 		printSyntaxTree_v2(tree->childR, tab, curCode, curCode + 1, lvl + 1, espace + 8 + getIntLen(precCode) + getIntLen(curCode) + *(tab + lvl));
 	}
 
-	printSpace(espace, 2);
+	printSpace(espace, 1);
 	printf("[%d] %s [%d]", precCode, tree->token, curCode);
 
 	if (tree->childL){

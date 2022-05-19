@@ -62,6 +62,9 @@ L                       [a-zA-Z_]
 "&"                     { strcpy(yylval.ndObj.name, (yytext)); return COMAND; }
 "/"                     { strcpy(yylval.ndObj.name, (yytext)); return SLASH;}
 ","                     { strcpy(yylval.ndObj.name, (yytext)); return COMMA; }
+"|"                     { strcpy(yylval.ndObj.name, (yytext)); return BAR; }
+"^"                     { strcpy(yylval.ndObj.name, (yytext)); return UP; }
+
 
 
 "\n"                    { yylineno++; }

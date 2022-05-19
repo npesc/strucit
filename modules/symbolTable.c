@@ -12,8 +12,7 @@ int hash(unsigned char *str){
     return hash;
 }
 
-//de sters naher
-varEnv* lookupvar(varEnv* env, unsigned int hash){
+varEnv* lookupvar(varEnv* env, int hash){
 
     while (env != NULL){
         if (env->hash == hash) {
@@ -23,8 +22,8 @@ varEnv* lookupvar(varEnv* env, unsigned int hash){
             env = env->nextEnv;
         }
     }
-    printf("%d not found\n", hash);
-    return NULL; 
+
+    logError(106);
 }
 
 int countNonGlobal(varEnv *env){
@@ -331,20 +330,165 @@ void printStructST(structEnv *env){
 //SEMANTICS PARTS -> need to add in a new FILE after
 
 
+int getSizePrimitif(int i){
+    switch (i){
+        case 0:
+            return 1;
+            break;
+        case 1:
+            return 4;
+            break;
+        case -1:
+            return 8;
+            break;
+        default:
+            return 8;
+            break;
+    }
+}
+
+int getSizeOf(varEnv *envVar, structEnv *envStruct, funcEnv *envFunc, int hash){
+    varEnv *tmp1 = envVar;
+    while (tmp1 != NULL){
+        if (tmp1->hash == hash){
+            return getSizePrimitif(tmp1->data->type);
+        }
+        tmp1 = tmp1->nextEnv;
+    }
+
+    structEnv *tmp2 = envStruct;
+    while (tmp2 != NULL){
+        if (tmp2->hash == hash){
+            return 8;
+        }
+        tmp2 = tmp2->nextEnv;
+    }
+
+    funcEnv *tmp3 = envFunc;
+    while (tmp3 != NULL){
+        if (tmp3->hash == hash){
+            return 8;
+        }
+        tmp3 = tmp3->nextEnv;
+    }
+
+    logError(101);
+}
+
 // BOOL : 
 //     0 -> false
 //     1 -> true
 
-int checkVarExists(varEnv *env, int hash){
-    varEnv *tmp = env;
+int checkVarFuncType(varEnv *env, funcEnv *envFunc, char *funcID, int hash){
+    varEnv *tmp1 = env;
 
-    while(tmp != NULL){
-        if (tmp->hash == hash){
-            return 1;
+    while(tmp1 != NULL){
+        if (tmp1->hash == hash){
+            return tmp1->data->type;
         }
-        
-        tmp = tmp->nextEnv;
+        tmp1 = tmp1->nextEnv;
     }   
 
-    return 0;
+    funcEnv *tmp2 = envFunc;
+    while(tmp2 != NULL){
+        if (tmp2->hash == hash){
+            return tmp2->data->returnType;
+        }
+        tmp2 = tmp2->nextEnv;
+    }
+
+    return -1;
+}
+
+int checkVarFuncExists(varEnv *env, funcEnv *envFunc, int hash){
+    varEnv *tmp1 = env;
+
+    while(tmp1 != NULL){
+        if (tmp1->hash == hash){
+            return 1;
+        }
+        tmp1 = tmp1->nextEnv;
+    }   
+
+    funcEnv *tmp2 = envFunc;
+    while(tmp2 != NULL){
+        if (tmp2->hash == hash){
+            return 1;
+        }
+        tmp2 = tmp2->nextEnv;
+    }
+
+    return -1;
+}
+
+int checkFuncExists(funcEnv *envFunc, int hash){
+    funcEnv *tmp2 = envFunc;
+    while(tmp2 != NULL){
+        if (tmp2->hash == hash){
+            return 1;
+        }
+        tmp2 = tmp2->nextEnv;
+    }
+
+    return -1;
+}
+
+int checkFieldExists(structEnv *env, int hash, char *field){
+    structEnv *tmp = env;
+    while (tmp != NULL){
+        if (tmp->hash == hash) {
+            int len = tmp->data->fieldsLen;
+
+            for (int i = 0; i < len ; i++){
+                if (strcmp(tmp->data->fieldsName[i], field) == 0){
+                    return 1;
+                }
+            }
+
+        }
+        tmp = tmp->nextEnv;
+    }
+
+    return -1;
+}
+
+int getVarType(varEnv *env, int hash){
+    varEnv *tmp1 = env;
+
+    while(tmp1 != NULL){
+        if (tmp1->hash == hash){
+            return tmp1->data->type;
+        }
+        tmp1 = tmp1->nextEnv;
+    } 
+
+    logError(104);
+}
+
+int checkStringIsInt(char *text){
+    int j;
+    j = strlen(text);
+    while(j--)
+    {
+        if(text[j] > 47 && text[j] < 58)
+            continue;
+
+        return -1;
+    }
+    return 1;
+}
+
+void writeFile(char *data){
+    FILE *fptr;
+
+    fptr = fopen("generated_code.bk","w");
+
+    if(fptr == NULL)
+    {
+        printf("Error!");   
+        exit(1);             
+    }
+
+    fprintf(fptr,"%s",data);
+    fclose(fptr);
 }

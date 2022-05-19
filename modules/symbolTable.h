@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "utility.h"
 
 // type_code : 
 //     0 -> void
@@ -55,7 +56,7 @@ int hash(unsigned char *str);
 varEnv *addNewVar(varEnv *env, varData *data);
 funcEnv *addNewFunc(funcEnv *env, funcData *data);
 structEnv *addNewStruct(structEnv *env, structData *data);
-varEnv* lookupvar(varEnv* env, unsigned int hash);
+varEnv* lookupvar(varEnv* env, int hash);
 char *getDataType(structEnv* envStruct, int i);
 char *getArgsType(int *argsType, int argsLen);
 varData *createVarData(char *id, int type, int globalFlag, int line);
@@ -70,3 +71,13 @@ void deleteNonGlobal1El(varEnv** head_ref);
 int countNonGlobal(varEnv *env);
 
 //SEMANTICS PARTS -> need to add in a new FILE after
+
+int getSizePrimitif(int i);
+int getSizeOf(varEnv *envVar, structEnv *envStruct, funcEnv *envFunc, int hash);
+int checkVarFuncType(varEnv *env, funcEnv *envFunc, char *funcID, int hash);
+int checkVarFuncExists(varEnv *env, funcEnv *envFunc, int hash);
+int checkFuncExists(funcEnv *envFunc, int hash);
+int checkFieldExists(structEnv *env, int hash, char *field);
+int getVarType(varEnv *env, int hash);
+int checkStringIsInt(char *str);
+void writeFile(char *data);

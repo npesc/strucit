@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+char* replaceWord(const char* s, const char* oldW, const char* newW);
+void logError(int errorCode);
 void printSpace(int c, int nbNL);
 int getIntLen(int n);
 int *addNewIntArray(int *tab, int size, int newVal);

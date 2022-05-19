@@ -1,5 +1,64 @@
 #include "utility.h"
 
+char* replaceWord(const char* s, const char* oldW, const char* newW){
+    char* result;
+    int i, cnt = 0;
+    int newWlen = strlen(newW);
+    int oldWlen = strlen(oldW);
+  
+    for (i = 0; s[i] != '\0'; i++) {
+        if (strstr(&s[i], oldW) == &s[i]) {
+            cnt++;
+            i += oldWlen - 1;
+        }
+    }
+  
+    result = (char*)malloc(i + cnt * (newWlen - oldWlen) + 1);
+  
+    i = 0;
+    while (*s) {
+        if (strstr(s, oldW) == s) {
+            strcpy(&result[i], newW);
+            i += newWlen;
+            s += oldWlen;
+        }
+        else
+            result[i++] = *s++;
+    }
+  
+    result[i] = '\0';
+    return result;
+}
+
+void logError(int errorCode){
+	printf("\n\n[ERROR : %d] ", errorCode);
+
+	switch (errorCode){
+		case 101:
+			printf("Parameter was not find in TS.\n");
+			break;
+		case 102:
+			printf("Function was not find in TS.\n");
+			break;
+		case 103:
+			printf("Structure's field was not find in TS.\n");
+			break;
+		case 104:
+			printf("Variable was not find in TS.\n");
+			break;
+		case 105:
+			printf("Expression was wainting for an integer.\n");
+			break;
+		case 106:
+			printf("Variable was not declared.\n");
+			break;
+		default:
+			break;
+	}
+
+	exit(1);
+}
+
 void printSpace(int c, int nbNL){
     for(int i = 0; i < nbNL; i++){
         printf("\n");

@@ -1,0 +1,17 @@
+int popop() {
+int k;
+int l;
+int n;
+}
+
+
+int main() {
+if (2 <= 3) goto condLabel_0;
+{
+return 45;
+}
+
+condLabel_0:
+
+}
+
