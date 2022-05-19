@@ -429,8 +429,14 @@ declaration
 			$$.nd = mkNode($1.nd, $2.nd, "declarVar");
 
 			if (nature == 0){
+				if (checkVarFuncExists(envVar, envFunc, hash(varID)) == 1){
+					logError(107);
+				}
 				envVar = addNewVar(envVar, createVarData(varID, type, globalFlag, yylineno));
 			} else {
+				if (checkVarFuncExists(envVar, envFunc, hash(funcID)) == 1){
+					logError(108);
+				}
 				envFunc = addNewFunc(envFunc, createFuncData(funcID, typeReturn, argsType, argsLen, tmpParamsName, yylineno));
 				typeReturn = 0;
 				returnFlag = 0;
@@ -879,7 +885,7 @@ int main(int argc, char* argv[]){
 	}
 
 	if (!yyparse()){
-		writeFile(generatedCode);
+		/* writeFile(generatedCode); */
 		
 		printVarST(envStruct, envVar);
 		printFuncST(envStruct, envFunc);
@@ -892,12 +898,12 @@ int main(int argc, char* argv[]){
 		head = headArray[programNb - 1];
 
 		//syntax tree v1
-		int *tab = malloc(sizeof(int) * 100);
+		/* int *tab = malloc(sizeof(int) * 100);
 		tab = getMaxLvlLen(head, tab,  0);
-		printSyntaxTree_v2(head, tab, -1, 0, 0, 0); 
+		printSyntaxTree_v2(head, tab, -1, 0, 0, 0);  */
 
 		//syntax tree v1
-		/* printSyntaxTree_v1(head, 0); */
+		printSyntaxTree_v1(head, 0);
 
 		printf("\n");
 

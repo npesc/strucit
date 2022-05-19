@@ -52,6 +52,12 @@ void logError(int errorCode){
 		case 106:
 			printf("Variable was not declared.\n");
 			break;
+		case 107:
+			printf("Variable already declared.\n");
+			break;
+		case 108:
+			printf("Function already declared.\n");
+			break;
 		default:
 			break;
 	}
